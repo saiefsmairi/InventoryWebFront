@@ -73,6 +73,7 @@ const AuthRegister = () => {
                     try {
                         setStatus({ success: false });
                         setSubmitting(false);
+                        console.log(values)
                     } catch (err) {
                         console.error(err);
                         setStatus({ success: false });

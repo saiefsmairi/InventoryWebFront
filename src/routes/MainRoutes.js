@@ -4,6 +4,9 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import MainLayout from 'layout/MainLayout';
 import Myprofil from 'pages/dashboard/Myprofil';
+import UsersAdmin from 'pages/dashboard/UsersAdmin';
+import ProductsListe from 'pages/dashboard/CompanyDashboard/ProductsListe';
+import CompanyUsers from 'pages/dashboard/CompanyDashboard/CompanyEmployees';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -59,6 +62,19 @@ const MainRoutes = {
         {
             path: 'myprofil',
             element: <Myprofil />
+        }
+        ,
+        {
+            path: 'users',
+            element: <UsersAdmin />
+        }  ,
+        {
+            path: 'companyemployees',
+            element: <CompanyUsers />
+        }  ,
+        {
+            path: 'products',
+            element: <ProductsListe />
         }
     ]
 };
