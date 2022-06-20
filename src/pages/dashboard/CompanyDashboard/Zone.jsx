@@ -83,35 +83,24 @@ const headCells = [
         label: 'Name',
     },
     {
-        id: 'calories',
-        numeric: true,
-        disablePadding: false,
-        label: 'Code',
-    },
-    {
         id: 'fat',
         numeric: true,
         disablePadding: false,
-        label: 'Quantity',
+        label: 'Code',
     },
     {
         id: 'carbs',
         numeric: true,
         disablePadding: false,
         label: 'Company',
-    },
+    }
+    ,
     {
-        id: 'prixunitaire',
-        numeric: true,
-        disablePadding: false,
-        label: 'Unite price',
-    },
-    {
-        id: 'etat',
+        id: 'act',
         numeric: true,
         disablePadding: false,
         label: 'Action',
-    },
+    }
 ];
 
 function EnhancedTableHead(props) {
@@ -202,7 +191,7 @@ const EnhancedTableToolbar = (props) => {
                     id="tableTitle"
                     component="div"
                 >
-                    Liste Of Products
+                    Liste Of Areas
                 </Typography>
             )}
 
@@ -240,7 +229,7 @@ const style = {
     p: 4,
 };
 
-export default function ProductsListe() {
+export default function Zone() {
 
     const rows = [{
         "name": "Donut1",
@@ -248,14 +237,15 @@ export default function ProductsListe() {
         "fat": 25,
         "carbs": 51,
         "protein": 4.9,
-        "prixunitaire":10
+        "code": 4.9
+
     }, {
         "name": "Donut",
         "calories": 452,
         "fat": 25,
         "carbs": 51,
         "protein": 4.9,
-        "prixunitaire":10
+        "code": 4.9
 
     }];
 
@@ -342,7 +332,7 @@ export default function ProductsListe() {
 
     return (
         <Box sx={{ width: '100%' }}>
-            <Button variant="contained" onClick={handleOpen} >Add new product</Button>
+            <Button variant="contained" onClick={handleOpen} >Add new Area</Button>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -406,12 +396,8 @@ export default function ProductsListe() {
                                                 {row.name}
                                             </TableCell>
                                             <TableCell align="right">{row.calories}</TableCell>
-                                            <TableCell align="right">{row.fat}</TableCell>
-                                            <TableCell align="right">{row.carbs}</TableCell>
-                                            <TableCell align="right">{row.prixunitaire}</TableCell>
+                                            <TableCell align="right">{row.code}</TableCell>
 
-
-                                            
                                             <TableCell align="right" style={{ marginLeft: "10px" }}>
                                                 <Button variant="contained" color="success" onClick={() => updateproduct(row)}>Update</Button>
                                                 <Button variant="contained" onClick={() => deleteproduct(row)}>Delete</Button>
