@@ -7,6 +7,9 @@ import Myprofil from 'pages/dashboard/Myprofil';
 import UsersAdmin from 'pages/dashboard/UsersAdmin';
 import ProductsListe from 'pages/dashboard/CompanyDashboard/ProductsListe';
 import CompanyUsers from 'pages/dashboard/CompanyDashboard/CompanyEmployees';
+import Area from 'pages/dashboard/CompanyDashboard/Area';
+import Zone from 'pages/dashboard/CompanyDashboard/Zone';
+import AffectUsersZone from 'pages/dashboard/CompanyDashboard/AffectUsersZone';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard')));
@@ -60,6 +63,10 @@ const MainRoutes = {
             element: <AntIcons />
         },
         {
+            path: 'affectuserszone',
+            element: <AffectUsersZone />
+        },
+        {
             path: 'myprofil',
             element: <Myprofil />
         }
@@ -75,6 +82,14 @@ const MainRoutes = {
         {
             path: 'products',
             element: <ProductsListe />
+        } ,
+        {
+            path: 'area',
+            element: <Area />
+        } ,
+        {
+            path: 'zone',
+            element: <Zone />
         }
     ]
 };

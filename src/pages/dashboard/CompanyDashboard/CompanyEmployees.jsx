@@ -100,7 +100,7 @@ const headCells = [
         id: 'protein',
         numeric: true,
         disablePadding: false,
-        label: 'Etat',
+        label: 'email',
     },
     {
         id: 'etat',
@@ -229,13 +229,15 @@ export default function CompanyEmployees() {
         "calories": 452,
         "fat": 25,
         "carbs": 51,
-        "protein": 4.9
+        "protein": 4.9,
+        "email":"saif@gmail.com"
     }, {
         "name": "Donut",
         "calories": 452,
         "fat": 25,
         "carbs": 51,
-        "protein": 4.9
+        "protein": 4.9,
+        "email":"saif@gmail.com"
     }];
 
     React.useEffect(() => {
@@ -378,9 +380,8 @@ export default function CompanyEmployees() {
                                             <TableCell align="right">{row.calories}</TableCell>
                                             <TableCell align="right">{row.fat}</TableCell>
                                             <TableCell align="right">{row.carbs}</TableCell>
-                                            <TableCell align="right">
-                                                <Button variant="contained" color="success">State</Button>
-                                            </TableCell>
+                                            <TableCell align="right">{row.email}</TableCell>
+
                                             <TableCell align="right">
                                                 <Button variant="contained">Delete</Button>
                                             </TableCell>

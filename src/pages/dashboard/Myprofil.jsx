@@ -38,7 +38,7 @@ export default function Myprofil() {
 
                         <Grid item xs container spacing={2} sx={{ px: 1 }}>
                             <Grid item xs={12} md={12}>
-                                <h4>USER INFORMATION</h4>
+                                <h4>USER INFORMATIONS</h4>
                             </Grid>
                             <Grid item xs={6} md={5}>
                                 <InputLabel style={{
@@ -70,6 +70,14 @@ export default function Myprofil() {
                                 }} >Email Adress</InputLabel>
                                 <TextField fullWidth id="outlined-basic" variant="outlined" />
                             </Grid>
+                    
+
+
+
+                        </Grid>
+      
+                        <Grid item xs container justifyContent="center" alignItems="center" >
+                            <Button variant="contained">Update</Button>
                         </Grid>
 
                         <Grid item xs container spacing={2} sx={{ px: 1 }}>
@@ -84,14 +92,22 @@ export default function Myprofil() {
                         </Grid>
                         <Grid item xs container spacing={2}>
                             <Grid item xs={12} md={12}>
-                                <h4>CONTACT INFORMATION</h4>
+                                <h4>Company INFORMATIONS</h4>
                             </Grid>
-                            <Grid item xs={12} md={10} sx={{ px: 1 }}>
+                            <Grid item xs={6} md={5} sx={{ px: 1 }}>
+                                <InputLabel style={{
+                                    fontWeight: 'bold'
+                                }} >Name</InputLabel>
+                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                            </Grid>
+
+                            <Grid item xs={6} md={5} sx={{ px: 1 }}>
                                 <InputLabel style={{
                                     fontWeight: 'bold'
                                 }} >Adress</InputLabel>
                                 <TextField fullWidth id="outlined-basic" variant="outlined" />
                             </Grid>
+
                             <Grid item xs={6} md={"auto"}>
                             </Grid>
 
@@ -127,7 +143,7 @@ export default function Myprofil() {
                           
                           </Grid>
                         <Grid item xs container justifyContent="center" alignItems="center" >
-                            <Button variant="contained">Update</Button>
+                            <Button variant="contained">Add Company</Button>
                         </Grid>
                         <Grid item xs container justifyContent="center" alignItems="center" >
                           
