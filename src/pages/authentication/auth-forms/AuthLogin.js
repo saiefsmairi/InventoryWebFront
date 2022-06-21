@@ -1,5 +1,9 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { login, reset } from 'store/reducers/authslice';
+import { useState,forwardRef,useEffect } from 'react';
 
 // material-ui
 import {
@@ -15,8 +19,11 @@ import {
     InputLabel,
     OutlinedInput,
     Stack,
-    Typography
+    Typography,
+    Snackbar,
+     
 } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
 // third party
 import * as Yup from 'yup';
@@ -32,7 +39,19 @@ import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 // ============================|| FIREBASE - LOGIN ||============================ //
 
 const AuthLogin = () => {
+    const Alert = forwardRef(function Alert(props, ref) {
+        return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    });
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const { user, isLoading, isError, isSuccess, message } = useSelector(
+        (state) => state.auth
+    )
+
+
     const [checked, setChecked] = React.useState(false);
+    const [open, setOpen] = useState(false);
 
     const [showPassword, setShowPassword] = React.useState(false);
     const handleClickShowPassword = () => {
@@ -43,12 +62,38 @@ const AuthLogin = () => {
         event.preventDefault();
     };
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+    useEffect(() => {
+        console.log("++++++++")
+        console.log(isSuccess)
+
+        if (isError) {
+            setOpen(true);
+
+            console.log(message)
+        }
+
+        if (isSuccess) {
+            navigate('/')
+
+        }
+        dispatch(reset()) //momken hedhi lezem tkoun kbal navigate eli fel if
+
+    }, [user, isError, isSuccess, message, navigate, dispatch])
+
     return (
         <>
             <Formik
                 initialValues={{
-                    email: 'info@codedthemes.com',
-                    password: '123456',
+                    email: '',
+                    password: '',
                     submit: null
                 }}
                 validationSchema={Yup.object().shape({
@@ -59,6 +104,8 @@ const AuthLogin = () => {
                     try {
                         setStatus({ success: false });
                         setSubmitting(false);
+                        dispatch(login(values))
+
                     } catch (err) {
                         setStatus({ success: false });
                         setErrors({ submit: err.message });
@@ -173,6 +220,11 @@ const AuthLogin = () => {
                                 <FirebaseSocial />
                             </Grid>
                         </Grid>
+                        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                            <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                            Invalid credentials
+                            </Alert>
+                        </Snackbar>
                     </form>
                 )}
             </Formik>

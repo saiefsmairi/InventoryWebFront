@@ -1,5 +1,8 @@
 import PropTypes from 'prop-types';
 import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout, reset } from 'store/reducers/authslice';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -55,9 +58,16 @@ function a11yProps(index) {
 
 const Profile = () => {
     const theme = useTheme();
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    //get user from localstorage
+    const { user } = useSelector((state) => state.auth)
 
+    // logout
     const handleLogout = async () => {
-        // logout
+        dispatch(logout())
+        dispatch(reset())
+        navigate('/login')
     };
 
     const anchorRef = useRef(null);

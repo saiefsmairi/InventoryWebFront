@@ -20,7 +20,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, forwardRef } from 'react';
 import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
@@ -29,6 +29,12 @@ import { Link as RouterLink } from 'react-router-dom';
 import Modal from '@mui/material/Modal';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
 import AnimateButton from 'components/@extended/AnimateButton';
+import Alert from '@mui/material/Alert';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { register, reset } from 'store/reducers/authslice';
+
+
 // material-ui
 import {
 
@@ -41,11 +47,20 @@ import {
     InputLabel,
     OutlinedInput,
     Stack,
+    Snackbar
 } from '@mui/material';
 
 
 function AddCompanyEmployee() {
 
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const { user, isLoading, isError, isSuccess, message } = useSelector(
+        (state) => state.auth
+    )
+
+    const [open, setOpen] = useState(false);
     const [level, setLevel] = useState();
     const [showPassword, setShowPassword] = useState(false);
     const handleClickShowPassword = () => {
@@ -66,28 +81,63 @@ function AddCompanyEmployee() {
         changePassword('');
     }, []);
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+
+    useEffect(() => {
+        console.log("++++++++")
+        console.log(isError)
+
+        if (isError) {
+            setOpen(true);
+            console.log(message)
+        }
+
+     /*    if (isSuccess || user) {
+            navigate('/login')
+        } */
+     //   dispatch(reset())
+
+    }, [user, isError, isSuccess, message, navigate, dispatch])
+
+
     return (
         <Formik
             initialValues={{
-                firstname: '',
-                lastname: '',
+                firstName: '',
+                lastName: '',
                 email: '',
-                company: '',
+                phone: '',
                 password: '',
+                role: '',
+                company:'',
                 submit: null
             }}
             validationSchema={Yup.object().shape({
-                firstname: Yup.string().max(255).required('First Name is required'),
-                lastname: Yup.string().max(255).required('Last Name is required'),
+                firstName: Yup.string().max(255).required('First Name is required'),
+                lastName: Yup.string().max(255).required('Last Name is required'),
                 email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
-                password: Yup.string().max(255).required('Password is required')
+                password: Yup.string().max(255).required('Password is required'),
+                phone: Yup.string().required().matches(/^[0-9]+$/, "Must be only digits").min(8, 'Must be exactly 8 digits'),
+
             })}
             onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
                 try {
                     setStatus({ success: false });
+                    values.role='ROLE_EMPLOYEE'
+                    values.company='Company affected to'
+                    console.log(values.role)
                     setSubmitting(false);
-                    console.log(values)
+                    dispatch(register(values))
                 } catch (err) {
+                    console.log("+++")
+                    console.log(err.message)
                     console.error(err);
                     setStatus({ success: false });
                     setErrors({ submit: err.message });
@@ -100,64 +150,64 @@ function AddCompanyEmployee() {
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={6}>
                             <Stack spacing={1}>
-                                <InputLabel htmlFor="firstname-signup">First Name*</InputLabel>
+                                <InputLabel htmlFor="firstName-signup">First Name*</InputLabel>
                                 <OutlinedInput
-                                    id="firstname-login"
-                                    type="firstname"
-                                    value={values.firstname}
-                                    name="firstname"
+                                    id="firstName-login"
+                                    type="firstName"
+                                    value={values.firstName}
+                                    name="firstName"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
                                     placeholder="John"
                                     fullWidth
-                                    error={Boolean(touched.firstname && errors.firstname)}
+                                    error={Boolean(touched.firstName && errors.firstName)}
                                 />
-                                {touched.firstname && errors.firstname && (
-                                    <FormHelperText error id="helper-text-firstname-signup">
-                                        {errors.firstname}
+                                {touched.firstName && errors.firstName && (
+                                    <FormHelperText error id="helper-text-firstName-signup">
+                                        {errors.firstName}
                                     </FormHelperText>
                                 )}
                             </Stack>
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Stack spacing={1}>
-                                <InputLabel htmlFor="lastname-signup">Last Name*</InputLabel>
+                                <InputLabel htmlFor="lastName-signup">Last Name*</InputLabel>
                                 <OutlinedInput
                                     fullWidth
-                                    error={Boolean(touched.lastname && errors.lastname)}
-                                    id="lastname-signup"
-                                    type="lastname"
-                                    value={values.lastname}
-                                    name="lastname"
+                                    error={Boolean(touched.lastName && errors.lastName)}
+                                    id="lastName-signup"
+                                    type="lastName"
+                                    value={values.lastName}
+                                    name="lastName"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
                                     placeholder="Doe"
                                     inputProps={{}}
                                 />
-                                {touched.lastname && errors.lastname && (
-                                    <FormHelperText error id="helper-text-lastname-signup">
-                                        {errors.lastname}
+                                {touched.lastName && errors.lastName && (
+                                    <FormHelperText error id="helper-text-lastName-signup">
+                                        {errors.lastName}
                                     </FormHelperText>
                                 )}
                             </Stack>
                         </Grid>
                         <Grid item xs={12}>
                             <Stack spacing={1}>
-                                <InputLabel htmlFor="company-signup">Company</InputLabel>
+                                <InputLabel htmlFor="phone-signup">Phone</InputLabel>
                                 <OutlinedInput
                                     fullWidth
-                                    error={Boolean(touched.company && errors.company)}
-                                    id="company-signup"
-                                    value={values.company}
-                                    name="company"
+                                    error={Boolean(touched.phone && errors.phone)}
+                                    id="phone-signup"
+                                    value={values.phone}
+                                    name="phone"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    placeholder="Demo Inc."
+                                    placeholder="example : 29162035"
                                     inputProps={{}}
                                 />
-                                {touched.company && errors.company && (
-                                    <FormHelperText error id="helper-text-company-signup">
-                                        {errors.company}
+                                {touched.phone && errors.phone && (
+                                    <FormHelperText error id="helper-text-phone-signup">
+                                        {errors.phone}
                                     </FormHelperText>
                                 )}
                             </Stack>
@@ -174,7 +224,7 @@ function AddCompanyEmployee() {
                                     name="email"
                                     onBlur={handleBlur}
                                     onChange={handleChange}
-                                    placeholder="demo@company.com"
+                                    placeholder="demo@phone.com"
                                     inputProps={{}}
                                 />
                                 {touched.email && errors.email && (
@@ -234,18 +284,7 @@ function AddCompanyEmployee() {
                                 </Grid>
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12}>
-                            <Typography variant="body2">
-                                By Signing up, you agree to our &nbsp;
-                                <Link variant="subtitle2" component={RouterLink} to="#">
-                                    Terms of Service
-                                </Link>
-                                &nbsp; and &nbsp;
-                                <Link variant="subtitle2" component={RouterLink} to="#">
-                                    Privacy Policy
-                                </Link>
-                            </Typography>
-                        </Grid>
+
                         {errors.submit && (
                             <Grid item xs={12}>
                                 <FormHelperText error>{errors.submit}</FormHelperText>
@@ -266,12 +305,15 @@ function AddCompanyEmployee() {
                                 </Button>
                             </AnimateButton>
                         </Grid>
-                        <Grid item xs={12}>
-                            <Divider>
-                                <Typography variant="caption">Sign up with</Typography>
-                            </Divider>
-                        </Grid>
+
+
                     </Grid>
+
+                    <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                            User with this email already exists
+                        </Alert>
+                    </Snackbar>
                 </form>
             )}
         </Formik>
