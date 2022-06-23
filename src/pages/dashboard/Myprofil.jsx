@@ -9,7 +9,26 @@ import Typography from '@mui/material/Typography';
 import ButtonBase from '@mui/material/ButtonBase';
 import MonthlyBarChart from './MonthlyBarChart';
 import Button from '@mui/material/Button';
+import { getMe, login, reset } from 'store/reducers/authslice';
+import { useState, forwardRef, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import MuiAlert from '@mui/material/Alert';
 
+// material-ui
+import {
+    Checkbox,
+    Divider,
+    FormControlLabel,
+    FormHelperText,
+    Link,
+    IconButton,
+    InputAdornment,
+    OutlinedInput,
+    Stack,
+    Snackbar,
+
+} from '@mui/material';
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -24,16 +43,48 @@ const Img = styled('img')({
     maxWidth: '100%',
     maxHeight: '100%',
 });
+const Alert = forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function Myprofil() {
+
+    const [open, setOpen] = useState(false);
+
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const { havePermission, isError } = useSelector(
+        (state) => state.auth
+    )
+
+    useEffect(() => {
+        dispatch(getMe())
+        if (isError) {
+            setOpen(true);
+        }
+
+    }, [isError, dispatch, havePermission])
+
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}  >
 
                 <Grid item xs={12} md={8} sm container>
-                    <Grid item xs container direction="column" spacing={2}  sx={{
+                    <Grid item xs container direction="column" spacing={2} sx={{
                         boxShadow: 5,
-                        borderRadius:'8px',
-                        borderColor:'#e6ebf1'
+                        borderRadius: '8px',
+                        borderColor: '#e6ebf1'
                     }}>
 
                         <Grid item xs container spacing={2} sx={{ px: 1 }}>
@@ -70,12 +121,12 @@ export default function Myprofil() {
                                 }} >Email Adress</InputLabel>
                                 <TextField fullWidth id="outlined-basic" variant="outlined" />
                             </Grid>
-                    
+
 
 
 
                         </Grid>
-      
+
                         <Grid item xs container justifyContent="center" alignItems="center" >
                             <Button variant="contained">Update</Button>
                         </Grid>
@@ -137,18 +188,18 @@ export default function Myprofil() {
                             </Grid>
                         </Grid>
                         <Grid item xs container justifyContent="center" alignItems="center" >
-                          
-                          </Grid>
-                          <Grid item xs container justifyContent="center" alignItems="center" >
-                          
-                          </Grid>
+
+                        </Grid>
+                        <Grid item xs container justifyContent="center" alignItems="center" >
+
+                        </Grid>
                         <Grid item xs container justifyContent="center" alignItems="center" >
                             <Button variant="contained">Add Company</Button>
                         </Grid>
                         <Grid item xs container justifyContent="center" alignItems="center" >
-                          
-                          </Grid>
-                      
+
+                        </Grid>
+
                     </Grid>
                 </Grid>
                 <Grid item md={4}>
@@ -163,7 +214,11 @@ export default function Myprofil() {
                     <MonthlyBarChart />
                 </Grid>
             </Grid>
-
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                    You dont have the permission
+                </Alert>
+            </Snackbar>
 
         </Box>
     );

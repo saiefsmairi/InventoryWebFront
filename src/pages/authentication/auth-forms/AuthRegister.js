@@ -77,21 +77,22 @@ const AuthRegister = () => {
 
 
     useEffect(() => {
-        console.log("++++++++")
-        console.log(isError)
-
         if (isError) {
             setOpen(true);
-
             console.log(message)
         }
 
-        if (isSuccess ) {
+        else if (isSuccess) {
             dispatch(reset())
-             navigate('/login')
+            navigate('/login')
         }
 
-      
+        else if (user) {
+            dispatch(reset())
+            navigate('/')
+        }
+        dispatch(reset())
+
 
     }, [user, isError, isSuccess, message, navigate, dispatch])
 
@@ -131,7 +132,7 @@ const AuthRegister = () => {
                 onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
                     try {
                         setStatus({ success: false });
-                        values.role='ROLE_ADMIN_COMPANY'
+                        values.role = 'ROLE_ADMIN_COMPANY'
                         setSubmitting(false);
                         dispatch(register(values))
                     } catch (err) {
