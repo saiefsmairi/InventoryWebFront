@@ -2,8 +2,9 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { login, reset } from 'store/reducers/authslice';
-import { useState,forwardRef,useEffect } from 'react';
+import { getMe, login, reset } from 'store/reducers/authslice';
+import { useState, forwardRef, useEffect } from 'react';
+import axios from 'axios'
 
 // material-ui
 import {
@@ -21,7 +22,7 @@ import {
     Stack,
     Typography,
     Snackbar,
-     
+
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
@@ -45,7 +46,7 @@ const AuthLogin = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const { user, isLoading, isError, isSuccess, message } = useSelector(
+    const { user, isLoading, isError, isSuccess, message ,havePermission} = useSelector(
         (state) => state.auth
     )
 
@@ -70,18 +71,16 @@ const AuthLogin = () => {
         setOpen(false);
     };
 
+
     useEffect(() => {
-        console.log("++++++++")
-        console.log(isSuccess)
-
-        if (isError) {
+        if (isError ) {
             setOpen(true);
-
-            console.log(message)
         }
 
-        if (isSuccess) {
+        if (isSuccess || user) {
+            //dispatch(getMe())
             navigate('/')
+
 
         }
         dispatch(reset()) //momken hedhi lezem tkoun kbal navigate eli fel if
@@ -222,7 +221,7 @@ const AuthLogin = () => {
                         </Grid>
                         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                             <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-                            Invalid credentials
+                                Invalid credentials
                             </Alert>
                         </Snackbar>
                     </form>

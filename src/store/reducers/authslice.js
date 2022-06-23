@@ -10,6 +10,7 @@ const initialState = {
     isSuccess: false,
     isLoading: false,
     message: '',
+    havePermission:false
 }
 
 // Register user
@@ -49,6 +50,27 @@ export const logout = createAsyncThunk('auth/logout', async () => {
     await authService.logout()
 })
 
+//getMe (get info about user who logged in)
+
+export const getMe = createAsyncThunk(
+    'auth/getMe',
+    async ( thunkAPI) => {
+        try {
+            return await authService.getMe()
+        } catch (error) {
+            console.log(error)
+            const message =
+                (error.response &&
+                    error.response.data &&
+                    error.response.data.message) ||
+                error.message ||
+                error.toString()
+            
+            return thunkAPI.rejectWithValue(message)
+        }
+    }
+)
+
 export const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -58,6 +80,8 @@ export const authSlice = createSlice({
             state.isSuccess = false
             state.isError = false
             state.message = ''
+            state.havePermission=false
+
         },
     },
     extraReducers: (builder) => {
@@ -68,7 +92,7 @@ export const authSlice = createSlice({
             .addCase(register.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.isSuccess = true
-                state.user = action.payload
+              //  state.user = action.payload
             })
             .addCase(register.rejected, (state, action) => {
                 state.isLoading = false
@@ -93,6 +117,20 @@ export const authSlice = createSlice({
             .addCase(logout.fulfilled, (state) => {
                 state.user = null
             })
+            .addCase(getMe.rejected, (state,action) => {
+                state.message = action.payload
+                state.isError = true
+                state.havePermission=false
+                state.user=false
+
+            })
+            .addCase(getMe.fulfilled, (state,action) => {
+                state.isError = false
+                state.havePermission=true
+                state.user=action.payload
+
+            })
+          
     },
 })
 

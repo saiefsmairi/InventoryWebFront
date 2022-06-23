@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useLocation, Navigate, Outlet } from "react-router-dom";
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { Box, Toolbar, useMediaQuery } from '@mui/material';
-
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { getMe, login, reset } from 'store/reducers/authslice';
 // project import
 import Drawer from './Drawer';
 import Header from './Header';
@@ -43,6 +44,13 @@ const MainLayout = () => {
         if (open !== drawerOpen) setOpen(drawerOpen);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawerOpen]);
+    const { user, isLoading, isError, isSuccess, message } = useSelector(
+        (state) => state.auth
+    )
+
+    useEffect(() => {
+        console.log(user)
+    }, [user])
 
     return (
         <Box sx={{ display: 'flex', width: '100%' }}>
@@ -51,10 +59,18 @@ const MainLayout = () => {
             <Box component="main" sx={{ width: '100%', flexGrow: 1, p: { xs: 2, sm: 3 } }}>
                 <Toolbar />
                 <Breadcrumbs navigation={navigation} title titleBottom card={false} divider={false} />
-                <Outlet />
+
+                {user
+                    ? <Outlet />
+                    : <Navigate to="/login" />
+
+                }
             </Box>
         </Box>
     );
 };
 
 export default MainLayout;
+
+//  {user? <Outlet />: <Navigate to="/login" />}
+//hné ysir auth guard idha mafamaech  user fel localstorage bech yhezou l login
