@@ -22,6 +22,10 @@ import Switch from '@mui/material/Switch';
 import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
+import userService from '../../services/userService'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
+import Modal from '@mui/material/Modal';
 
 
 function descendingComparator(a, b, orderBy) {
@@ -54,36 +58,46 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
+
+
+
+
 const headCells = [
     {
-        id: 'name',
+        id: 'firstName',
         numeric: false,
         disablePadding: true,
-        label: 'Name',
+        label: 'First name',
     },
     {
-        id: 'calories',
+        id: 'lastName',
         numeric: true,
         disablePadding: false,
         label: 'Last name',
     },
     {
-        id: 'fat',
+        id: 'role',
         numeric: true,
         disablePadding: false,
-        label: 'Type',
+        label: 'Role',
     },
     {
-        id: 'carbs',
+        id: 'company',
         numeric: true,
         disablePadding: false,
         label: 'Company',
     },
     {
-        id: 'protein',
+        id: 'email',
         numeric: true,
         disablePadding: false,
         label: 'Email',
+    },
+    {
+        id: 'Phone',
+        numeric: true,
+        disablePadding: false,
+        label: 'Phone',
     },
     {
         id: 'etat',
@@ -104,15 +118,7 @@ function EnhancedTableHead(props) {
         <TableHead>
             <TableRow>
                 <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': 'select all desserts',
-                        }}
-                    />
+
                 </TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
@@ -149,89 +155,31 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-const EnhancedTableToolbar = (props) => {
-    const { numSelected } = props;
-
-    return (
-        <Toolbar
-            sx={{
-                pl: { sm: 2 },
-                pr: { xs: 1, sm: 1 },
-                ...(numSelected > 0 && {
-                    bgcolor: (theme) =>
-                        alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                }),
-            }}
-        >
-            {numSelected > 0 ? (
-                <Typography
-                    sx={{ flex: '1 1 100%' }}
-                    color="inherit"
-                    variant="subtitle1"
-                    component="div"
-                >
-                    {numSelected} selected
-                </Typography>
-            ) : (
-                <Typography
-                    sx={{ flex: '1 1 100%' }}
-                    variant="h6"
-                    id="tableTitle"
-                    component="div"
-                >
-                    Liste Of Users
-                </Typography>
-            )}
-
-            {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <DeleteOutlined />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-
-                    </IconButton>
-                </Tooltip>
-            )}
-        </Toolbar>
-    );
-};
-
-EnhancedTableToolbar.propTypes = {
-    numSelected: PropTypes.number.isRequired,
-};
-
 export default function UsersAdmin() {
+    const userlogged = JSON.parse(localStorage.getItem("user"))
+    const AuthStr = 'Bearer '.concat(userlogged.token);
+    const [rows, setRows] = React.useState([])
 
-    const rows = [{
-        "name": "Donut1",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "email":"saif@gmail.com"
-    }, {
-        "name": "Donut",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "email":"saif2@gmail.com"
-
-    }];
+    const getAllUsers = () => {
+        axios.get("http://localhost:5000/users/users", { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            setRows(res.data)
+        }).catch(function (error) {
+            console.log(error.response.data.error)
+            if (error.response.data.error === 'you dont have the permission') {
+                //role check 
+            }
+        })
+    };
 
     React.useEffect(() => {
-        console.log(rows)
+        getAllUsers()
 
-
-    }, [rows])
+    }, []);
 
 
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('firstName');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
@@ -281,8 +229,19 @@ export default function UsersAdmin() {
         setPage(0);
     };
 
-    const handleChangeDense = (event) => {
-        setDense(event.target.checked);
+
+
+    const handleClickDelete = (row) => {
+        console.log(row)
+        axios.delete("http://localhost:5000/users/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            getAllUsers()
+
+
+        }).catch(function (error) {
+            console.log(error.response.data)
+
+        })
     };
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
@@ -294,7 +253,6 @@ export default function UsersAdmin() {
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar numSelected={selected.length} />
                 <TableContainer>
                     <Table
                         sx={{ minWidth: 750 }}
@@ -312,6 +270,7 @@ export default function UsersAdmin() {
                         <TableBody>
                             {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
+
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
@@ -321,7 +280,6 @@ export default function UsersAdmin() {
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={(event) => handleClick(event, row.name)}
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
@@ -329,13 +287,6 @@ export default function UsersAdmin() {
                                             selected={isItemSelected}
                                         >
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={isItemSelected}
-                                                    inputProps={{
-                                                        'aria-labelledby': labelId,
-                                                    }}
-                                                />
                                             </TableCell>
                                             <TableCell
                                                 component="th"
@@ -343,16 +294,19 @@ export default function UsersAdmin() {
                                                 scope="row"
                                                 padding="none"
                                             >
-                                                {row.name}
+                                                {row.firstName}
                                             </TableCell>
-                                            <TableCell align="right">{row.calories}</TableCell>
-                                            <TableCell align="right">{row.fat}</TableCell>
-                                            <TableCell align="right">{row.carbs}</TableCell>
+                                            <TableCell align="right">{row.lastName}</TableCell>
+                                            <TableCell align="right">{row.role}</TableCell>
+                                            <TableCell align="right">company</TableCell>
                                             <TableCell align="right">
-                                               {row.email}
+                                                {row.email}
                                             </TableCell>
                                             <TableCell align="right">
-                                                <Button variant="contained">Delete</Button>
+                                                {row.phone}
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <Button variant="contained" onClick={() => handleClickDelete(row)}>Delete</Button>
                                             </TableCell>
 
                                         </TableRow>
