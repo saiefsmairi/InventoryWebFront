@@ -14,6 +14,8 @@ import { useState, forwardRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import MuiAlert from '@mui/material/Alert';
+import axios from 'axios'
+
 
 // material-ui
 import {
@@ -47,24 +49,63 @@ const Alert = forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+
+
 export default function Myprofil() {
-
     const [open, setOpen] = useState(false);
-
+    const [companyDetails, setcompanyDetails] = useState();
     const navigate = useNavigate()
     const dispatch = useDispatch()
-
-    const { havePermission, isError } = useSelector(
+    const { userLoggedIn, user } = useSelector(
         (state) => state.auth
     )
+    const AuthStr = 'Bearer '.concat(user.token);
+
 
     useEffect(() => {
         dispatch(getMe())
-        if (isError) {
-            setOpen(true);
-        }
+        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            setcompanyDetails(res.data[0])
+            console.log(res.data[0])
 
-    }, [isError, dispatch, havePermission])
+        }).catch(function (error) {
+            console.log(error)
+
+        })
+
+    }, [])
+
+
+    const [formData, setFormData] = useState({
+        companyname: "",
+        companyadress: "",
+        city: "",
+        country: "",
+        postalcode: "",
+    });
+
+    const { companyname, companyadress, city, country, postalcode, idcompanyadmin } = formData;
+
+    const onChange = (e) =>
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        console.log(formData)
+        formData.idcompanyadmin = userLoggedIn._id
+         axios.post("http://localhost:5000/company", formData).then(function (response) {
+            console.log('company added successfully')
+            setOpen(true)
+
+            console.log(response)
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
+      
+       
+        
+    };
+
 
 
     const handleClose = (event, reason) => {
@@ -95,14 +136,14 @@ export default function Myprofil() {
                                 <InputLabel style={{
                                     fontWeight: 'bold'
                                 }} >First Name</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                                <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.firstName} />
                             </Grid>
 
                             <Grid item xs={6} md={5}>
                                 <InputLabel style={{
                                     fontWeight: 'bold'
-                                }} >Last Name</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                                }} >Last Name </InputLabel>
+                                <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.lastName} />
                             </Grid>
                         </Grid>
 
@@ -112,14 +153,14 @@ export default function Myprofil() {
                                 <InputLabel style={{
                                     fontWeight: 'bold'
                                 }} >Phone Number</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                                <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.phone} />
                             </Grid>
 
                             <Grid item xs={6} md={5}>
                                 <InputLabel style={{
                                     fontWeight: 'bold'
                                 }} >Email Adress</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                                <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.email} />
                             </Grid>
 
 
@@ -139,66 +180,84 @@ export default function Myprofil() {
                                     borderColor: 'rgb(239 238 238)'
                                 }} />
                             </Grid>
-
-                        </Grid>
-                        <Grid item xs container spacing={2}>
-                            <Grid item xs={12} md={12}>
-                                <h4>Company INFORMATIONS</h4>
-                            </Grid>
-                            <Grid item xs={6} md={5} sx={{ px: 1 }}>
-                                <InputLabel style={{
-                                    fontWeight: 'bold'
-                                }} >Name</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
-                            </Grid>
-
-                            <Grid item xs={6} md={5} sx={{ px: 1 }}>
-                                <InputLabel style={{
-                                    fontWeight: 'bold'
-                                }} >Adress</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
-                            </Grid>
-
-                            <Grid item xs={6} md={"auto"}>
-                            </Grid>
-
                         </Grid>
 
-                        <Grid item xs container spacing={2} sx={{ px: 1 }}>
+                        <form onSubmit={onSubmit}>
 
-                            <Grid item xs={4} md={3.3}>
-                                <InputLabel style={{
-                                    fontWeight: 'bold'
-                                }} >City</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                            <Grid xs container spacing={2} sx={{ px: 1 }}>
+                                <Grid item xs={12} md={12}>
+                                    <h4>Company INFORMATIONS</h4>
+                                </Grid>
+                                <Grid item xs={6} md={5} sx={{ px: 1 }}>
+                                    <InputLabel style={{
+                                        fontWeight: 'bold'
+                                    }} >Name</InputLabel>
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="companyname"
+                                        placeholder="companyname"
+                                        value={companyDetails?.companyname}
+                                        onChange={(e) => onChange(e)} />
+                                </Grid>
+
+                                <Grid item xs={6} md={5} sx={{ px: 1 }}>
+                                    <InputLabel style={{
+                                        fontWeight: 'bold'
+                                    }} >Adress</InputLabel>
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="companyadress"
+                                        placeholder="companyadress"
+                                        value={companyDetails?.companyadress}
+                                        onChange={(e) => onChange(e)} />
+                                </Grid>
+
+                                <Grid item xs={6} md={"auto"}>
+                                </Grid>
 
                             </Grid>
-                            <Grid item xs={4} md={3.3}>
-                                <InputLabel style={{
-                                    fontWeight: 'bold'
-                                }} >Country</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+
+                            <Grid item xs container spacing={2} sx={{ px: 1 }}>
+
+                                <Grid item xs={4} md={3.3}>
+                                    <InputLabel style={{
+                                        fontWeight: 'bold'
+                                    }} >City</InputLabel>
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="city"
+                                        placeholder="city"
+                                        value={companyDetails?.city}
+                                        onChange={(e) => onChange(e)} />
+
+                                </Grid>
+                                <Grid item xs={4} md={3.3}>
+                                    <InputLabel style={{
+                                        fontWeight: 'bold'
+                                    }} >Country</InputLabel>
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="country"
+                                        placeholder="country"
+                                        value={companyDetails?.country}
+                                        onChange={(e) => onChange(e)} />
+
+                                </Grid>
+                                <Grid item xs={4} md={3.3}>
+                                    <InputLabel style={{
+                                        fontWeight: 'bold'
+                                    }} >Postal code</InputLabel>
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="postalcode"
+                                        placeholder="postalcode"
+                                        value={companyDetails?.postalcode}
+                                        onChange={(e) => onChange(e)} />
+                                </Grid>
+                            </Grid>
+                            <Grid item xs container justifyContent="center" alignItems="center" >
 
                             </Grid>
-                            <Grid item xs={4} md={3.3}>
-                                <InputLabel style={{
-                                    fontWeight: 'bold'
-                                }} >Postal code</InputLabel>
-                                <TextField fullWidth id="outlined-basic" variant="outlined" />
+                            <Grid item xs container justifyContent="center" alignItems="center" >
+
                             </Grid>
-                        </Grid>
-                        <Grid item xs container justifyContent="center" alignItems="center" >
+                            <Grid item xs container justifyContent="center" alignItems="center" sx={{ margin: '20px' }}  >
+                                <Button variant="contained" type="submit" >Update Company</Button>
+                            </Grid>
+                            <Grid item xs container justifyContent="center" alignItems="center" >
 
-                        </Grid>
-                        <Grid item xs container justifyContent="center" alignItems="center" >
-
-                        </Grid>
-                        <Grid item xs container justifyContent="center" alignItems="center" >
-                            <Button variant="contained">Add Company</Button>
-                        </Grid>
-                        <Grid item xs container justifyContent="center" alignItems="center" >
-
-                        </Grid>
+                            </Grid>
+                        </form>
 
                     </Grid>
                 </Grid>
@@ -206,7 +265,7 @@ export default function Myprofil() {
                     <Box sx={{ p: 3, pb: 0 }}>
 
                         <Typography variant="h6" color="textSecondary">
-                            This Week Statistics
+                            weekly revenue
                         </Typography>
                         <Typography variant="h4">$7,650</Typography>
 
@@ -215,8 +274,8 @@ export default function Myprofil() {
                 </Grid>
             </Grid>
             <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-                <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-                    You dont have the permission
+                <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                company added successfully
                 </Alert>
             </Snackbar>
 
