@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import authService from '../../services/authService'
+import companyService from '../../services/companyService'
 
 // Get user from localStorage
 const user = JSON.parse(localStorage.getItem('user'))
@@ -11,7 +12,9 @@ const initialState = {
     isLoading: false,
     message: '',
     havePermission: false,
-    userLoggedIn:null //hedha l user mouch mel localstorage mel getme
+    userLoggedIn:null, //hedha l user mouch mel localstorage mel getme
+    companyOfAdmin:null,
+    isErrorGetme:false
 }
 
 // Register user
@@ -72,6 +75,23 @@ export const getMe = createAsyncThunk(
     }
 )
 
+
+// getcompany user
+export const getcompanybyadmin = createAsyncThunk('auth/getcompanybyadmin', async (user, thunkAPI) => {
+    try {
+        return await companyService.getcompanybyadmin(user)
+    } catch (error) {
+        const message =
+            (error.response && error.response.data && error.response.data.message) ||
+            error.message ||
+            error.toString()
+        return thunkAPI.rejectWithValue(message)
+    }
+})
+
+
+
+
 export const authSlice = createSlice({
     name: 'auth',
     initialState,
@@ -121,15 +141,18 @@ export const authSlice = createSlice({
             })
             .addCase(getMe.rejected, (state, action) => {
                 state.message = action.payload
-                state.isError = true
+                state.isErrorGetme = true
                 state.havePermission = false
                 state.userLoggedIn = null
 
             })
             .addCase(getMe.fulfilled, (state, action) => {
-                state.isError = false
                 state.havePermission = true
                 state.userLoggedIn=action.payload
+
+            })
+            .addCase(getcompanybyadmin.fulfilled, (state, action) => {
+                state.companyOfAdmin=action.payload
 
             })
 
