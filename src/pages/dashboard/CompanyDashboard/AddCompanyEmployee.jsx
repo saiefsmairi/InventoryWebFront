@@ -93,11 +93,14 @@ function AddCompanyEmployee({ companyDetails }) {
     }, []);
 
     const handleClose = (event, reason) => {
+        console.log("lol")
         if (reason === 'clickaway') {
             return;
         }
 
         setOpen(false);
+        setopenNotifAddEmployee(false)
+
     };
 
 
