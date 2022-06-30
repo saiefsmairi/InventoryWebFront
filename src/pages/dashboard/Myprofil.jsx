@@ -105,7 +105,8 @@ export default function Myprofil() {
     }
 
     useEffect(() => {
-        dispatch(getMe())
+        console.log(userLoggedIn)
+        // dispatch(getMe())
         getcompanybyadmin()
 
     }, [])
@@ -129,7 +130,7 @@ export default function Myprofil() {
                 formData.idcompanyadmin = userLoggedIn._id
                 axios.post("http://localhost:5000/company", formData).then(function (response) {
                     setOpen(true)
-    
+
                     console.log(response)
                 })
                     .catch(function (error) {
@@ -138,7 +139,7 @@ export default function Myprofil() {
                 getcompanybyadmin()
             }
 
-         
+
         }
 
         if (Havecompany) {
@@ -240,7 +241,7 @@ export default function Myprofil() {
 
                             <form onSubmit={onSubmit}>
 
-                                <Grid xs container spacing={2} sx={{ px: 1 }}>
+                                <Grid xs item container spacing={2} sx={{ px: 1 }}>
                                     <Grid item xs={12} md={12}>
                                         <h4>Company INFORMATIONS</h4>
                                     </Grid>

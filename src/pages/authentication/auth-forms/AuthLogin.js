@@ -2,7 +2,7 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getMe, login, reset } from 'store/reducers/authslice';
+import { getMe, login, reset, getcompanybyadmin } from 'store/reducers/authslice';
 import { useState, forwardRef, useEffect } from 'react';
 import axios from 'axios'
 
@@ -46,7 +46,7 @@ const AuthLogin = () => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const { user, isLoading, isError, isSuccess, message ,havePermission} = useSelector(
+    const { user, isLoading, isError, isSuccess, message, havePermission ,companyOfAdmin} = useSelector(
         (state) => state.auth
     )
 
@@ -67,25 +67,23 @@ const AuthLogin = () => {
         if (reason === 'clickaway') {
             return;
         }
-
         setOpen(false);
     };
 
 
     useEffect(() => {
-        if (isError ) {
+        if (isError) {
             setOpen(true);
         }
 
-        if (isSuccess || user) {
-            //dispatch(getMe())
+        else if (isSuccess || user) {
+            dispatch(getMe())
+            dispatch(getcompanybyadmin(user))
             navigate('/')
-
-
         }
         dispatch(reset()) //momken hedhi lezem tkoun kbal navigate eli fel if
 
-    }, [user, isError, isSuccess, message, navigate, dispatch])
+    }, [user, isError, isSuccess, message, navigate, dispatch,companyOfAdmin])
 
     return (
         <>

@@ -33,6 +33,7 @@ import Alert from '@mui/material/Alert';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { register, reset } from 'store/reducers/authslice';
+import axios from 'axios'
 
 
 // material-ui
@@ -51,18 +52,27 @@ import {
 } from '@mui/material';
 
 
-function AddCompanyEmployee() {
+function AddCompanyEmployee({ companyDetails }) {
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const { user, isLoading, isError, isSuccess, message } = useSelector(
+    const { user, isLoading, isError, isSuccess, message, userLoggedIn } = useSelector(
         (state) => state.auth
     )
 
     const [open, setOpen] = useState(false);
+    const [openNotifAddEmployee, setopenNotifAddEmployee] = useState(false);
+    const [responseAddEmployetoCompany, setresponseAddEmployetoCompany] = useState('');
+
     const [level, setLevel] = useState();
     const [showPassword, setShowPassword] = useState(false);
+    const [data, setData] = useState({
+        userid: "",
+        companyid: "",
+    });
+
+
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
     };
@@ -78,31 +88,34 @@ function AddCompanyEmployee() {
     };
 
     useEffect(() => {
+        console.log(companyDetails)
         changePassword('');
     }, []);
 
     const handleClose = (event, reason) => {
+        console.log("lol")
         if (reason === 'clickaway') {
             return;
         }
 
         setOpen(false);
+        setopenNotifAddEmployee(false)
+
     };
 
 
     useEffect(() => {
         console.log("++++++++")
-        console.log(isError)
 
         if (isError) {
-            setOpen(true);
+
             console.log(message)
         }
 
-     /*    if (isSuccess || user) {
-            navigate('/login')
-        } */
-     //   dispatch(reset())
+        /*    if (isSuccess || user) {
+               navigate('/login')
+           } */
+        //   dispatch(reset())
 
     }, [user, isError, isSuccess, message, navigate, dispatch])
 
@@ -116,7 +129,7 @@ function AddCompanyEmployee() {
                 phone: '',
                 password: '',
                 role: '',
-                company:'',
+                company: '',
                 submit: null
             }}
             validationSchema={Yup.object().shape({
@@ -130,11 +143,39 @@ function AddCompanyEmployee() {
             onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
                 try {
                     setStatus({ success: false });
-                    values.role='ROLE_EMPLOYEE'
-                    values.company='Company affected to'
+                    values.role = 'ROLE_EMPLOYEE'
                     console.log(values.role)
                     setSubmitting(false);
-                    dispatch(register(values))
+                    setOpen(false);
+
+                    axios.post("http://localhost:5000/users", values).then(function (response) {
+                        console.log(response.data._id)
+                        data.userid = response.data._id;
+                        data.companyid = companyDetails._id;
+                        console.log(data)
+                      
+                        axios.put("http://localhost:5000/company/updateCompany/AddEmployees", data).then(function (response) {
+
+                            console.log(response)
+                            setresponseAddEmployetoCompany(response.data.message)
+                            setopenNotifAddEmployee(true)
+                        })
+                            .catch(function (error) {
+                                console.log(error)
+                                setresponseAddEmployetoCompany(response.data.message)
+                                setopenNotifAddEmployee(true)
+
+                            })
+
+
+                    })
+                        .catch(function (error) {
+                            setOpen(true)
+                            console.log(error)
+
+                        })
+
+
                 } catch (err) {
                     console.log("+++")
                     console.log(err.message)
@@ -300,6 +341,7 @@ function AddCompanyEmployee() {
                                     type="submit"
                                     variant="contained"
                                     color="primary"
+
                                 >
                                     Create Account
                                 </Button>
@@ -312,6 +354,12 @@ function AddCompanyEmployee() {
                     <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                         <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
                             User with this email already exists
+                        </Alert>
+                    </Snackbar>
+
+                    <Snackbar open={openNotifAddEmployee} autoHideDuration={6000} onClose={handleClose}>
+                        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
+                            {responseAddEmployetoCompany}
                         </Alert>
                     </Snackbar>
                 </form>

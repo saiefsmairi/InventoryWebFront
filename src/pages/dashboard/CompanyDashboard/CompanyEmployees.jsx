@@ -24,7 +24,12 @@ import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
 import AddCompanyEmployee from './AddCompanyEmployee';
-
+import { convertTypeAcquisitionFromJson } from '../../../../node_modules/typescript/lib/typescript';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { register, reset ,getcompanybyadmin} from 'store/reducers/authslice';
+import { useState,useEffect } from 'react';
+import axios from 'axios'
 
 const style = {
     position: 'absolute',
@@ -192,12 +197,12 @@ const EnhancedTableToolbar = (props) => {
                 </Typography>
             ) : (
                 <Typography
-                   
+
                     variant="h6"
                     id="tableTitle"
                     component="div"
                 >
-                    
+
                 </Typography>
             )}
 
@@ -230,14 +235,14 @@ export default function CompanyEmployees() {
         "fat": 25,
         "carbs": 51,
         "protein": 4.9,
-        "email":"saif@gmail.com"
+        "email": "saif@gmail.com"
     }, {
         "name": "Donut",
         "calories": 452,
         "fat": 25,
         "carbs": 51,
         "protein": 4.9,
-        "email":"saif@gmail.com"
+        "email": "saif@gmail.com"
     }];
 
     React.useEffect(() => {
@@ -247,13 +252,23 @@ export default function CompanyEmployees() {
     }, [rows])
 
 
+    const [Havecompany, setHavecompany] = useState(true);
+    const [companyDetails, setcompanyDetails] = useState([]);
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+    
+    const { user, isLoading, isError, isSuccess, message, userLoggedIn,companyOfAdmin } = useSelector(
+        (state) => state.auth
+    )
+    const AuthStr = 'Bearer '.concat(user.token);
 
+    
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -298,9 +313,6 @@ export default function CompanyEmployees() {
         setPage(0);
     };
 
-    const handleChangeDense = (event) => {
-        setDense(event.target.checked);
-    };
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
@@ -310,7 +322,29 @@ export default function CompanyEmployees() {
 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        console.log("closssed")
+        setOpen(false);
+    }
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            if (typeof res.data[0] === 'undefined') {
+                console.log('fi west undefined')
+                setHavecompany(false)
+            }
+            else {
+                console.log(res.data[0])
+                setHavecompany(true)
+                setcompanyDetails(res.data[0])
+            }
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+
+    }, [])
+
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -322,7 +356,9 @@ export default function CompanyEmployees() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <AddCompanyEmployee />
+                    <AddCompanyEmployee companyDetails={companyDetails}
+                    />
+
                 </Box>
             </Modal>
             <Paper sx={{ width: '100%', mb: 2 }}>
