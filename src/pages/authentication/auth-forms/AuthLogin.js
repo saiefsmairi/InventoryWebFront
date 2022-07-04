@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getMe, login, reset, getcompanybyadmin } from 'store/reducers/authslice';
 import { useState, forwardRef, useEffect } from 'react';
-import axios from 'axios'
 
 // material-ui
 import {

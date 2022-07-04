@@ -62,9 +62,12 @@ export default function Myprofil() {
     const [Havecompany, setHavecompany] = useState(true);
 
     const [companyDetails, setcompanyDetails] = useState();
+    const [userLoggedIn, setuserLoggedIn] = useState('');
+
+    
     const navigate = useNavigate()
     const dispatch = useDispatch()
-    const { userLoggedIn, user } = useSelector(
+    const { user } = useSelector(
         (state) => state.auth
     )
     const AuthStr = 'Bearer '.concat(user.token);
@@ -105,8 +108,17 @@ export default function Myprofil() {
     }
 
     useEffect(() => {
-        console.log(userLoggedIn)
-        // dispatch(getMe())
+        
+        axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
+
+            console.log(res.data)
+            setuserLoggedIn(res.data)
+
+        }).catch(function (error) {
+            console.log(error)
+
+        })
+        
         getcompanybyadmin()
 
     }, [])
