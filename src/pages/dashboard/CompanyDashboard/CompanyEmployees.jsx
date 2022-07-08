@@ -13,33 +13,35 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
 import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
 
 import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
 import AddCompanyEmployee from './AddCompanyEmployee';
-import { convertTypeAcquisitionFromJson } from '../../../../node_modules/typescript/lib/typescript';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { register, reset, getcompanybyadmin } from 'store/reducers/authslice';
 import { useState, useEffect } from 'react';
 import axios from 'axios'
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemText from '@mui/material/ListItemText';
 import Dialog from '@mui/material/Dialog';
+import Input from '@mui/material/Input';
+import InputAdornment from '@mui/material/InputAdornment';
+
+import {
+    Alert,
+    Snackbar
+} from '@mui/material';
+
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { InputLabel } from '@mui/material';
 
 import Avatar from '@mui/material/Avatar';
 const style = {
@@ -240,6 +242,8 @@ EnhancedTableToolbar.propTypes = {
 
 export default function CompanyEmployees() {
     const [rows, setRows] = useState([])
+    const [openNotifUpdateEmployee, setopenNotifUpdateEmployee] = useState(false);
+
     const [data, setData] = useState({
         userid: "",
         companyid: "",
@@ -248,7 +252,7 @@ export default function CompanyEmployees() {
     function getcompanybyadmin() {
         axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
-                console.log('fi west undefined')
+
                 setHavecompany(false)
             }
             else {
@@ -256,7 +260,7 @@ export default function CompanyEmployees() {
                 setHavecompany(true)
                 setcompanyDetails(res.data[0])
                 res.data[0].employees.forEach(element => {
-                    console.log(element.employee)
+
 
                     testrows.push(element.employee)
                 });
@@ -268,7 +272,6 @@ export default function CompanyEmployees() {
             console.log(error)
         })
     }
-
 
 
     const [Havecompany, setHavecompany] = useState(true);
@@ -341,14 +344,15 @@ export default function CompanyEmployees() {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
-        console.log("closssed")
         testrows = []
         setOpen(false);
-
         getcompanybyadmin()
     }
 
+    const handleCloseupdateAlert = () => {
+        setopenNotifUpdateEmployee(false)
 
+    }
 
     useEffect(() => {
         getcompanybyadmin()
@@ -377,7 +381,7 @@ export default function CompanyEmployees() {
         data.companyid = companyDetails._id;
         console.log(data)
 
-        axios.put("http://localhost:5000/company/updateCompany/RemoveEmployeeFromCompany", data).then(function (response) {
+        axios.put("http://localhost:5000/company/updateCompany/RemoveEmployeeFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
             console.log(response)
             testrows = []
             setopendelete(false);
@@ -387,7 +391,6 @@ export default function CompanyEmployees() {
         })
             .catch(function (error) {
                 console.log(error)
-
 
             })
 
@@ -402,10 +405,76 @@ export default function CompanyEmployees() {
             console.log(error.response.data)
 
         })
+    };
+
+    //update employee
+
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        password: "",
+        showPassword: false,
+
+    });
+
+    const { firstName, lastName, email, phone, password } = formData;
+
+    const [openupdateemployee, setopenupdateemployee] = React.useState(false);
+    const [responseAddEmployetoCompany, setresponseAddEmployetoCompany] = useState('');
+
+    const onChange = (e) =>
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+
+
+    const handleClickopenupdateemployee = (row) => {
+        console.log(row)
+        setclickedemployee(row)
+        setFormData({
+            firstName: row.firstName,
+            lastName: row.lastName,
+            email: row.email,
+            phone: row.phone,
+        });
+        setopenupdateemployee(true);
+    };
+
+    const handleCloseupdateemployee = () => {
+        setopenupdateemployee(false);
 
     };
 
+    const clickupdatebutton = async (e) => {
+        e.preventDefault();
+        axios.put("http://localhost:5000/users/updateuser/" + clickedemployee._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            testrows = []
+            getcompanybyadmin()
+            setopenupdateemployee(false);
+            setresponseAddEmployetoCompany("update done")
+            setopenNotifUpdateEmployee(true)
 
+        })
+            .catch(function (error) {
+                console.log(error.response.data.message)
+                setresponseAddEmployetoCompany(error.response.data.message)
+                setopenNotifUpdateEmployee(true)
+
+            })
+
+    };
+
+    //password EyeOutlined
+    const handleClickShowPassword = () => {
+        setFormData({
+            ...formData,
+            showPassword: !formData.showPassword,
+        });
+    };
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
 
     return (
         <Box sx={{ width: '100%' }}>
@@ -473,6 +542,9 @@ export default function CompanyEmployees() {
                                             <TableCell align="right">{row.email}</TableCell>
 
                                             <TableCell align="right">
+                                                <Button variant="contained" onClick={() => handleClickopenupdateemployee(row)} sx={{ mx: '10px' }} >
+                                                    Update
+                                                </Button>
                                                 <Button variant="contained" onClick={() => handleClickOpen1(row)}  >
                                                     Delete
                                                 </Button>
@@ -522,6 +594,89 @@ export default function CompanyEmployees() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <form >
+                <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
+                    <DialogTitle>Update employee informations</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            label="Name"
+                            name="firstName"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.firstName}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="lastname"
+                            name="lastName"
+                            label="LastName"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.lastName}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="email"
+                            label="Email Address"
+                            type="email"
+                            name="email"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.email}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="phone"
+                            label="Phone"
+                            name="phone"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.phone}
+                            onChange={(e) => onChange(e)}
+                        />
+
+
+                        <label htmlFor="password">Password</label>
+                        <Input
+                            id="standard-adornment-password"
+                            type={formData.showPassword ? 'text' : 'password'}
+                            label="Password"
+                            name="password"
+                            onChange={(e) => onChange(e)}
+                            margin="dense"
+                            fullWidth
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password EyeOutlined"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                    >
+                                        {formData.showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                    </IconButton>
+                                </InputAdornment>
+                            }
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseupdateemployee}>Cancel</Button>
+                        <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                    </DialogActions>
+                </Dialog>
+            </form>
+
+            <Snackbar open={openNotifUpdateEmployee} autoHideDuration={6000} onClose={handleCloseupdateAlert}>
+                <Alert onClose={handleCloseupdateAlert} severity="info" sx={{ width: '100%' }}>
+                    {responseAddEmployetoCompany}
+                </Alert>
+            </Snackbar>
+
         </Box>
     );
 }
