@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useLocation, Navigate, Outlet } from "react-router-dom";
-
+import {  Navigate, Outlet } from "react-router-dom";
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { Box, Toolbar, useMediaQuery } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { getMe, login, reset } from 'store/reducers/authslice';
+
 // project import
 import Drawer from './Drawer';
 import Header from './Header';
@@ -44,7 +42,7 @@ const MainLayout = () => {
         if (open !== drawerOpen) setOpen(drawerOpen);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [drawerOpen]);
-    const { user, isLoading, isError, isSuccess, message } = useSelector(
+    const { user } = useSelector(
         (state) => state.auth
     )
 
