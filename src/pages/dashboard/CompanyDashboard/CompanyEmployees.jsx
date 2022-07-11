@@ -478,7 +478,7 @@ export default function CompanyEmployees() {
 
     return (
         <Box sx={{ width: '100%' }}>
-            <Button variant="contained" onClick={handleOpen} >Add new Employee</Button>
+            <Button variant="contained" onClick={handleOpen} >Add new Employee for company {companyDetails.companyname} </Button>
             <Modal
                 open={open}
                 onClose={handleClose}
