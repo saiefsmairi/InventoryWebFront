@@ -163,6 +163,7 @@ export default function Area() {
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
+    const [openupdateemployee, setopenupdateemployee] = React.useState(false);
 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
@@ -174,12 +175,13 @@ export default function Area() {
 
     const [formData, setFormData] = useState({
         code: "",
-        namearea: "",
+        name: "",
         companyid: ""
     });
     const [companyDetails, setcompanyDetails] = useState([]);
+    const [clickedArea, setclickedArea] = React.useState('');
 
-    const { code, namearea } = formData;
+    const { code, name } = formData;
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -209,7 +211,7 @@ export default function Area() {
     }
 
 
-    const clickupdatebutton = async (e) => {
+    const clickaddbutton = async (e) => {
         e.preventDefault();
         // getcompanybyadmin()
         formData.companyid = companyDetails._id
@@ -218,14 +220,11 @@ export default function Area() {
             testrows = []
             getcompanybyadmin()
             setOpen(false);
-            //setopenupdateemployee(false);
-            //setresponseAddEmployetoCompany("update done")
-            //  setopenNotifUpdateEmployee(true)
+
         })
             .catch(function (error) {
                 console.log(error)
-                //   setresponseAddEmployetoCompany(error.response.data.message)
-                //  setopenNotifUpdateEmployee(true)
+
             })
 
     };
@@ -245,8 +244,6 @@ export default function Area() {
         setSelected([]);
     };
 
-
-
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -256,13 +253,52 @@ export default function Area() {
         setPage(0);
     };
 
+
+    ////////////////////////////////////////////////////////////
+
+    //open update dialog on button click
+    const handleCloseupdateemployee = () => {
+        setopenupdateemployee(false);
+
+    };
+
+    const handleClickUpdateOpen = (row) => {
+        setclickedArea(row)
+        setFormData({
+            code: row.code,
+            name: row.name,
+        });
+        setopenupdateemployee(true);
+
+    };
+
+
+    const clickupdatebutton = async (e) => {
+        e.preventDefault();
+        console.log(formData)
+
+        console.log("clicked on update")
+        axios.put("http://localhost:5000/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            testrows = []
+            getcompanybyadmin()
+            setopenupdateemployee(false);
+
+
+        })
+            .catch(function (error) {
+                console.log(error)
+
+
+            })
+
+    };
+
     const handleClickDelete = (row) => {
         data.areaid = row._id;
         data.companyid = companyDetails._id;
         console.log(data)
 
         axios.put("http://localhost:5000/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
-
             if (response) {
                 console.log(response)
                 testrows = []
@@ -284,13 +320,8 @@ export default function Area() {
                 console.log(error)
 
             })
-
-
-
-
     };
 
-    const isSelected = (name) => selected.indexOf(name) !== -1;
 
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
@@ -345,7 +376,7 @@ export default function Area() {
 
 
                                             <TableCell align="right">
-                                                <Button variant="contained" sx={{ mx: '10px' }} >
+                                                <Button variant="contained" sx={{ mx: '10px' }} onClick={() => handleClickUpdateOpen((row))} >
                                                     Update
                                                 </Button>
                                                 <Button variant="contained" onClick={() => handleClickDelete(row)}>Delete</Button>
@@ -387,15 +418,17 @@ export default function Area() {
                         fullWidth
                         variant="standard"
                         onChange={(e) => onChange(e)}
+
                     />
                     <TextField
                         margin="dense"
-                        id="namearea"
-                        name="namearea"
+                        id="name"
+                        name="name"
                         label="Area name"
                         fullWidth
                         variant="standard"
                         onChange={(e) => onChange(e)}
+
                     />
 
 
@@ -404,9 +437,46 @@ export default function Area() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={clickupdatebutton}>Add</Button>
+                    <Button onClick={clickaddbutton}>Add</Button>
                 </DialogActions>
             </Dialog>
+
+            <form >
+                <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
+                    <DialogTitle>Update employee informations</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            label="code"
+                            name="code"
+                            fullWidth
+                            variant="standard"
+                            onChange={(e) => onChange(e)}
+                            defaultValue={clickedArea?.code}
+
+                        />
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            name="name"
+                            label="Area name"
+                            fullWidth
+                            variant="standard"
+                            onChange={(e) => onChange(e)}
+                            defaultValue={clickedArea?.name}
+
+                        />
+
+
+
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseupdateemployee}>Cancel</Button>
+                        <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                    </DialogActions>
+                </Dialog>
+            </form>
         </Box>
     );
 }
