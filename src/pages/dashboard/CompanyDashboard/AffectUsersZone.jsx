@@ -18,32 +18,27 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
+import TextField from '@mui/material/TextField';
+import { useState, useEffect } from 'react';
 import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { Link as RouterLink } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import userService from '../../../services/userService'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 import Modal from '@mui/material/Modal';
-import { strengthColor, strengthIndicator } from 'utils/password-strength';
-import AnimateButton from 'components/@extended/AnimateButton';
-// material-ui
-import {
-
-    Divider,
-    FormControl,
-    FormHelperText,
-    Grid,
-    Link,
-    InputAdornment,
-    InputLabel,
-    OutlinedInput,
-    Stack,
-} from '@mui/material';
-import AddProduct from './AddProduct';
-
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Input from '@mui/material/Input';
+import InputAdornment from '@mui/material/InputAdornment';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -75,37 +70,27 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
+
+
+
+var testrows = []
+var areas = []
+
 const headCells = [
     {
-        id: 'name',
+        id: 'firstName',
         numeric: false,
         disablePadding: true,
-        label: 'Name',
-    },
-    {
-        id: 'calories',
-        numeric: true,
-        disablePadding: false,
         label: 'Code',
     },
     {
-        id: 'fat',
+        id: 'lastName',
         numeric: true,
         disablePadding: false,
-        label: 'Quantity',
+        label: 'Name',
     },
-    {
-        id: 'carbs',
-        numeric: true,
-        disablePadding: false,
-        label: 'Company',
-    },
-    {
-        id: 'prixunitaire',
-        numeric: true,
-        disablePadding: false,
-        label: 'Unite price',
-    },
+
+
     {
         id: 'etat',
         numeric: true,
@@ -121,21 +106,11 @@ function EnhancedTableHead(props) {
         onRequestSort(event, property);
     };
 
-
-
     return (
         <TableHead>
             <TableRow>
                 <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': 'select all desserts',
-                        }}
-                    />
+
                 </TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
@@ -172,112 +147,93 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-const EnhancedTableToolbar = (props) => {
-    const { numSelected } = props;
-
-    return (
-        <Toolbar
-            sx={{
-                pl: { sm: 2 },
-                pr: { xs: 1, sm: 1 },
-                ...(numSelected > 0 && {
-                    bgcolor: (theme) =>
-                        alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                }),
-            }}
-        >
-            {numSelected > 0 ? (
-                <Typography
-                    sx={{ flex: '1 1 100%' }}
-                    color="inherit"
-                    variant="subtitle1"
-                    component="div"
-                >
-                    {numSelected} selected
-                </Typography>
-            ) : (
-                <Typography
-                    sx={{ flex: '1 1 100%' }}
-                    variant="h6"
-                    id="tableTitle"
-                    component="div"
-                >
-                    Liste Of Products
-                </Typography>
-            )}
-
-            {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton>
-                        <DeleteOutlined />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton>
-
-                    </IconButton>
-                </Tooltip>
-            )}
-        </Toolbar>
-    );
-};
-
-EnhancedTableToolbar.propTypes = {
-    numSelected: PropTypes.number.isRequired,
-};
-
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid white',
-    boxShadow: 24,
-
-    p: 4,
-};
-
 export default function AffectUsersZone() {
+    const userlogged = JSON.parse(localStorage.getItem("user"))
+    const AuthStr = 'Bearer '.concat(userlogged.token);
+    const [rows, setRows] = React.useState([])
+    const { user } = useSelector(
+        (state) => state.auth
+    )
 
-    const rows = [{
-        "name": "Donut1",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "prixunitaire":10
-    }, {
-        "name": "Donut",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "prixunitaire":10
-
-    }];
-
-    React.useEffect(() => {
-        console.log(rows)
-
-
-    }, [rows])
+    const [data, setData] = useState({
+        areaid: "",
+        companyid: "",
+    });
 
 
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('firstName');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+    const [openupdateemployee, setopenupdateemployee] = React.useState(false);
 
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        testrows = []
+        setOpen(false);
+        getcompanybyadmin()
+    };
 
+    const [formData, setFormData] = useState({
+        code: "",
+        name: "",
+        companyid: ""
+    });
+    const [companyDetails, setcompanyDetails] = useState([]);
+    const [clickedArea, setclickedArea] = React.useState('');
+
+    const { code, name } = formData;
+
+    const onChange = (e) =>
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+
+    useEffect(() => {
+        testrows = []
+        getcompanybyadmin()
+
+    }, [])
+
+    function getcompanybyadmin() {
+        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            if (typeof res.data[0] === 'undefined') {
+                console.log("no company for this user")
+            }
+            else {
+                console.log(res.data[0])
+                setcompanyDetails(res.data[0])
+                res.data[0].areas.forEach(element => {
+                    testrows.push(element.area)
+                });
+                setRows(testrows)
+            }
+            //i stopped at showing users on slelect bye
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+
+    const clickaddbutton = async (e) => {
+        e.preventDefault();
+        // getcompanybyadmin()
+        formData.companyid = companyDetails._id
+        console.log(formData)
+        axios.put("http://localhost:5000/area/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            testrows = []
+            getcompanybyadmin()
+            setOpen(false);
+
+        })
+            .catch(function (error) {
+                console.log(error)
+
+            })
+
+    };
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -294,26 +250,6 @@ export default function AffectUsersZone() {
         setSelected([]);
     };
 
-    const handleClick = (event, name) => {
-        const selectedIndex = selected.indexOf(name);
-        let newSelected = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
-        }
-
-        setSelected(newSelected);
-    };
-
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
     };
@@ -324,37 +260,92 @@ export default function AffectUsersZone() {
     };
 
 
-    const isSelected = (name) => selected.indexOf(name) !== -1;
+    ////////////////////////////////////////////////////////////
 
-    const updateproduct = (id) => {
-        console.log(id)
+    //open update dialog on button click
+    const handleCloseupdateemployee = () => {
+        setopenupdateemployee(false);
+
     };
 
-    const deleteproduct = (id) => {
-        console.log(id)
+    const handleClickUpdateOpen = (row) => {
+        setclickedArea(row)
+        setFormData({
+            code: row.code,
+            name: row.name,
+        });
+        setopenupdateemployee(true);
+
     };
+
+
+    const clickupdatebutton = async (e) => {
+        e.preventDefault();
+        console.log(formData)
+
+        console.log("clicked on update")
+        axios.put("http://localhost:5000/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            testrows = []
+            getcompanybyadmin()
+            setopenupdateemployee(false);
+
+
+        })
+            .catch(function (error) {
+                console.log(error)
+
+
+            })
+
+    };
+
+    const handleClickDelete = (row) => {
+        data.areaid = row._id;
+        data.companyid = companyDetails._id;
+        console.log(data)
+
+        axios.put("http://localhost:5000/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
+            if (response) {
+                console.log(response)
+                testrows = []
+                getcompanybyadmin()
+
+                axios.delete("http://localhost:5000/area/deletearea/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+                    console.log(res.data)
+                    console.log("area deleted")
+                    getcompanybyadmin()
+
+                }).catch(function (error) {
+                    console.log(error.response.data)
+
+                })
+            }
+
+        })
+            .catch(function (error) {
+                console.log(error)
+
+            })
+    };
+
+
+
+//dialogue assign new employee
+const [employee, setemployee] = React.useState('');
+const handleChangeemployee = (event) => {
+    setemployee(event.target.value);
+};
+
 
     // Avoid a layout jump when reaching the last page with empty rows.
-
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-
     return (
         <Box sx={{ width: '100%' }}>
-            <Button variant="contained" onClick={handleOpen} >Add new product</Button>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={style}>
-                    <AddProduct />
-                </Box>
-            </Modal>
+            <Button variant="contained" onClick={handleOpen} >Assign Employee to a zone</Button>
+
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar numSelected={selected.length} />
                 <TableContainer>
                     <Table
                         sx={{ minWidth: 750 }}
@@ -372,30 +363,20 @@ export default function AffectUsersZone() {
                         <TableBody>
                             {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
+
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={(event) => handleClick(event, row.name)}
                                             role="checkbox"
-                                            aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.name}
-                                            selected={isItemSelected}
+                                            key={row._id}
                                         >
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={isItemSelected}
-                                                    inputProps={{
-                                                        'aria-labelledby': labelId,
-                                                    }}
-                                                />
                                             </TableCell>
                                             <TableCell
                                                 component="th"
@@ -403,19 +384,16 @@ export default function AffectUsersZone() {
                                                 scope="row"
                                                 padding="none"
                                             >
-                                                {row.name}
+                                                {row?.code}
                                             </TableCell>
-                                            <TableCell align="right">{row.calories}</TableCell>
-                                            <TableCell align="right">{row.fat}</TableCell>
-                                            <TableCell align="right">{row.carbs}</TableCell>
-                                            <TableCell align="right">{row.prixunitaire}</TableCell>
+                                            <TableCell align="right">{row?.name}</TableCell>
 
 
-                                            
-                                            <TableCell align="right" style={{ marginLeft: "10px" }}>
-                                                <Button variant="contained" color="success" onClick={() => updateproduct(row)}>Update</Button>
-                                                <Button variant="contained" onClick={() => deleteproduct(row)}>Delete</Button>
-
+                                            <TableCell align="right">
+                                                <Button variant="contained" sx={{ mx: '10px' }} onClick={() => handleClickUpdateOpen((row))} >
+                                                    Update
+                                                </Button>
+                                                <Button variant="contained" onClick={() => handleClickDelete(row)}>Delete</Button>
                                             </TableCell>
 
                                         </TableRow>
@@ -443,7 +421,94 @@ export default function AffectUsersZone() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+            <Dialog open={open} onClose={handleClose}>
+                <DialogTitle>Assign Employee to a zone</DialogTitle>
+                <DialogContent>
 
+                    
+                <InputLabel id="demo-simple-select-label">Area</InputLabel>
+                    <Select
+                        labelId="demo-simple-select-label"
+                        id="demo-simple-select"
+                        value={employee}
+                        label="Area"
+                        onChange={handleChangeemployee}
+                        fullWidth
+                    >
+                        {areas.map((area, index) => (
+
+                            <MenuItem value={area._id}> {area.name}</MenuItem>
+                        ))}
+                    </Select>
+
+
+                    <TextField
+                        margin="dense"
+                        id="name"
+                        label="code"
+                        name="code"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => onChange(e)}
+
+                    />
+                    <TextField
+                        margin="dense"
+                        id="name"
+                        name="name"
+                        label="Area name"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => onChange(e)}
+
+                    />
+
+
+
+
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={clickaddbutton}>Add</Button>
+                </DialogActions>
+            </Dialog>
+
+            <form >
+                <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
+                    <DialogTitle>Update employee informations</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            label="code"
+                            name="code"
+                            fullWidth
+                            variant="standard"
+                            onChange={(e) => onChange(e)}
+                            defaultValue={clickedArea?.code}
+
+                        />
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            name="name"
+                            label="Area name"
+                            fullWidth
+                            variant="standard"
+                            onChange={(e) => onChange(e)}
+                            defaultValue={clickedArea?.name}
+
+                        />
+
+
+
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseupdateemployee}>Cancel</Button>
+                        <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                    </DialogActions>
+                </Dialog>
+            </form>
         </Box>
     );
 }
