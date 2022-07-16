@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
-import { useRef, useState } from 'react';
+import { useRef, useState ,useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout, reset } from 'store/reducers/authslice';
+import axios from 'axios'
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -84,10 +85,29 @@ const Profile = () => {
     };
 
     const [value, setValue] = useState(0);
+    const [userLoggedIn, setuserLoggedIn] = useState('');
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
+
+    const AuthStr = 'Bearer '.concat(user.token);
+
+    useEffect(() => {
+        
+        axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
+
+            console.log(res.data)
+            setuserLoggedIn(res.data)
+
+        }).catch(function (error) {
+            console.log(error)
+
+        })
+        
+     
+
+    }, [])
 
     const iconBackColorOpen = 'grey.300';
 
@@ -108,7 +128,7 @@ const Profile = () => {
             >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
                     <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
-                    <Typography variant="subtitle1">John Doe</Typography>
+                    <Typography variant="subtitle1">{userLoggedIn.firstName} {userLoggedIn.lastName}</Typography>
                 </Stack>
             </ButtonBase>
             <Popper
@@ -151,9 +171,9 @@ const Profile = () => {
                                                     <Stack direction="row" spacing={1.25} alignItems="center">
                                                         <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                                                         <Stack>
-                                                            <Typography variant="h6">John Doe</Typography>
+                                                            <Typography variant="h6">{userLoggedIn.firstName} {userLoggedIn.lastName}</Typography>
                                                             <Typography variant="body2" color="textSecondary">
-                                                                UI/UX Designer
+                                                              {userLoggedIn.role}
                                                             </Typography>
                                                         </Stack>
                                                     </Stack>
