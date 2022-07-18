@@ -39,7 +39,10 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
+import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
@@ -70,27 +73,35 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-
-
-
 var testrows = []
 var areas = []
+var employeesTab = []
 
 const headCells = [
     {
-        id: 'firstName',
+        id: 'employee',
         numeric: false,
         disablePadding: true,
-        label: 'Code',
+        label: 'Employee',
     },
     {
-        id: 'lastName',
+        id: 'zone',
         numeric: true,
         disablePadding: false,
-        label: 'Name',
+        label: 'Zone (name)',
     },
-
-
+    {
+        id: 'datedebut',
+        numeric: true,
+        disablePadding: false,
+        label: 'Date debut',
+    },
+    {
+        id: 'datefin',
+        numeric: true,
+        disablePadding: false,
+        label: 'Date fin',
+    },
     {
         id: 'etat',
         numeric: true,
@@ -151,6 +162,10 @@ export default function AffectUsersZone() {
     const userlogged = JSON.parse(localStorage.getItem("user"))
     const AuthStr = 'Bearer '.concat(userlogged.token);
     const [rows, setRows] = React.useState([])
+    const [areaselect, setareaselect] = React.useState([])
+    const [zonebyArea, setzonebyArea] = React.useState([])
+    const [employeesarray, setemployeesarray] = React.useState([])
+
     const { user } = useSelector(
         (state) => state.auth
     )
@@ -159,7 +174,6 @@ export default function AffectUsersZone() {
         areaid: "",
         companyid: "",
     });
-
 
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('firstName');
@@ -170,7 +184,10 @@ export default function AffectUsersZone() {
     const [openupdateemployee, setopenupdateemployee] = React.useState(false);
 
     const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
+    const handleOpen = () => {
+        setOpen(true);
+        FindZoneByArea()
+    }
     const handleClose = () => {
         testrows = []
         setOpen(false);
@@ -178,22 +195,27 @@ export default function AffectUsersZone() {
     };
 
     const [formData, setFormData] = useState({
-        code: "",
-        name: "",
-        companyid: ""
+        zone: "",
+        employee: "",
+        Datedebut: "",
+        Datefin: "",
+        company: ""
     });
+
+
     const [companyDetails, setcompanyDetails] = useState([]);
     const [clickedArea, setclickedArea] = React.useState('');
 
-    const { code, name } = formData;
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
 
     useEffect(() => {
         testrows = []
+        areas = []
+        employeesTab = []
         getcompanybyadmin()
-
+        // findAffectationByCompany() 
     }, [])
 
     function getcompanybyadmin() {
@@ -204,12 +226,61 @@ export default function AffectUsersZone() {
             else {
                 console.log(res.data[0])
                 setcompanyDetails(res.data[0])
-                res.data[0].areas.forEach(element => {
-                    testrows.push(element.area)
+                employeesTab = []
+
+                testrows = []
+                res.data[0].employees.forEach(element => {
+                    employeesTab.push(element)
                 });
-                setRows(testrows)
+                res.data[0].areas.forEach(element => {
+                    areas.push(element.area._id)
+                });
+                setareaselect(areas)
+                setemployeesarray(employeesTab)
+                FindAreaAndTheirZonesByCompany(res.data[0])
+                findAffectationByCompany(res.data[0])
+
             }
-            //i stopped at showing users on slelect bye
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    function FindZoneByArea() {
+        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areaselect }, { headers: { Authorization: AuthStr } }).then((res) => {
+            setzonebyArea(res.data)
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+
+    function FindAreaAndTheirZonesByCompany(data) {
+        axios.get("http://localhost:5000/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            res.data.forEach(element => {
+
+
+            });
+
+            // setareaselect(areas)
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    function findAffectationByCompany(company) {
+        console.log("wiww")
+        axios.get("http://localhost:5000/affectation/" + company._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+
+
+            res.data.forEach(element => {
+                testrows.push(element)
+            });
+            setRows(testrows)
 
         }).catch(function (error) {
             console.log(error)
@@ -219,13 +290,19 @@ export default function AffectUsersZone() {
 
     const clickaddbutton = async (e) => {
         e.preventDefault();
+
         // getcompanybyadmin()
-        formData.companyid = companyDetails._id
+        formData.Datedebut = Datedebut
+        formData.Datefin = Datefin
+        formData.zone = zone
+        formData.employee = employees
+        formData.company = companyDetails._id
+
         console.log(formData)
-        axios.put("http://localhost:5000/area/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
-            testrows = []
+        axios.post("http://localhost:5000/affectation/", formData, { headers: { Authorization: AuthStr } }).then(function (res) {
+            console.log(res)
             getcompanybyadmin()
-            setOpen(false);
+            setOpen(false)
 
         })
             .catch(function (error) {
@@ -288,15 +365,10 @@ export default function AffectUsersZone() {
             testrows = []
             getcompanybyadmin()
             setopenupdateemployee(false);
-
-
         })
             .catch(function (error) {
                 console.log(error)
-
-
             })
-
     };
 
     const handleClickDelete = (row) => {
@@ -328,187 +400,214 @@ export default function AffectUsersZone() {
             })
     };
 
+    //dialogue assign new employee and zone
+    const [zone, setzone] = React.useState(1);
+    const [employees, setemployee] = React.useState(1);
 
+    const handleChangezone = (event) => {
+        setzone(event.target.value);
+    };
 
-//dialogue assign new employee
-const [employee, setemployee] = React.useState('');
-const handleChangeemployee = (event) => {
-    setemployee(event.target.value);
-};
+    const handleChangeEmployee = (event) => {
+        setemployee(event.target.value);
+    };
 
+    const [Datedebut, setDatedebut] = React.useState(new Date());
+    const [Datefin, setDatefin] = React.useState(new Date());
 
+    const handleChangeDatedebut = (newValue) => {
+        setDatedebut(newValue.format("YYYY-MM-DD"));
+    };
+    const handleChangeDatefin = (newValue) => {
+        setDatefin(newValue.format("YYYY-MM-DD"));
+    };
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
     return (
-        <Box sx={{ width: '100%' }}>
-            <Button variant="contained" onClick={handleOpen} >Assign Employee to a zone</Button>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
 
-            <Paper sx={{ width: '100%', mb: 2 }}>
-                <TableContainer>
-                    <Table
-                        sx={{ minWidth: 750 }}
-                        aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
-                    >
-                        <EnhancedTableHead
-                            numSelected={selected.length}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={handleSelectAllClick}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
-                        <TableBody>
-                            {/* if you don't need to support IE11, you can replace the `stableSort` call with:
+            <Box sx={{ width: '100%' }}>
+                <Button variant="contained" onClick={handleOpen} >Assign Employee to a zone</Button>
+
+                <Paper sx={{ width: '100%', mb: 2 }}>
+                    <TableContainer>
+                        <Table
+                            sx={{ minWidth: 750 }}
+                            aria-labelledby="tableTitle"
+                            size={dense ? 'small' : 'medium'}
+                        >
+                            <EnhancedTableHead
+                                numSelected={selected.length}
+                                order={order}
+                                orderBy={orderBy}
+                                onSelectAllClick={handleSelectAllClick}
+                                onRequestSort={handleRequestSort}
+                                rowCount={rows.length}
+                            />
+                            <TableBody>
+                                {/* if you don't need to support IE11, you can replace the `stableSort` call with:
                  rows.slice().sort(getComparator(order, orderBy)) */}
 
-                            {stableSort(rows, getComparator(order, orderBy))
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((row, index) => {
-                                    const labelId = `enhanced-table-checkbox-${index}`;
+                                {stableSort(rows, getComparator(order, orderBy))
+                                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    .map((row, index) => {
+                                        const labelId = `enhanced-table-checkbox-${index}`;
 
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox"
-                                            tabIndex={-1}
-                                            key={row._id}
-                                        >
-                                            <TableCell padding="checkbox">
-                                            </TableCell>
-                                            <TableCell
-                                                component="th"
-                                                id={labelId}
-                                                scope="row"
-                                                padding="none"
+                                        return (
+                                            <TableRow
+                                                hover
+                                                role="checkbox"
+                                                tabIndex={-1}
+                                                key={row._id}
                                             >
-                                                {row?.code}
-                                            </TableCell>
-                                            <TableCell align="right">{row?.name}</TableCell>
+                                                <TableCell padding="checkbox">
+                                                </TableCell>
+                                                <TableCell
+                                                    component="th"
+                                                    id={labelId}
+                                                    scope="row"
+                                                    padding="none"
+                                                >
+                                                    {row?.employee.firstName}   {row?.employee.lastName}
+                                                </TableCell>
+                                                <TableCell align="right">{row?.zone.name}</TableCell>
+                                                <TableCell align="right">{row?.Datedebut}</TableCell>
+                                                <TableCell align="right">{row?.Datefin}</TableCell>
 
 
-                                            <TableCell align="right">
-                                                <Button variant="contained" sx={{ mx: '10px' }} onClick={() => handleClickUpdateOpen((row))} >
-                                                    Update
-                                                </Button>
-                                                <Button variant="contained" onClick={() => handleClickDelete(row)}>Delete</Button>
-                                            </TableCell>
+                                                <TableCell align="right">
+                                                    <Button variant="contained" sx={{ mx: '10px' }} onClick={() => handleClickUpdateOpen((row))} >
+                                                        Update
+                                                    </Button>
+                                                    <Button variant="contained" onClick={() => handleClickDelete(row)}>Delete</Button>
+                                                </TableCell>
 
-                                        </TableRow>
-                                    );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-            </Paper>
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Assign Employee to a zone</DialogTitle>
-                <DialogContent>
-
-                    
-                <InputLabel id="demo-simple-select-label">Area</InputLabel>
-                    <Select
-                        labelId="demo-simple-select-label"
-                        id="demo-simple-select"
-                        value={employee}
-                        label="Area"
-                        onChange={handleChangeemployee}
-                        fullWidth
-                    >
-                        {areas.map((area, index) => (
-
-                            <MenuItem value={area._id}> {area.name}</MenuItem>
-                        ))}
-                    </Select>
-
-
-                    <TextField
-                        margin="dense"
-                        id="name"
-                        label="code"
-                        name="code"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => onChange(e)}
-
+                                            </TableRow>
+                                        );
+                                    })}
+                                {emptyRows > 0 && (
+                                    <TableRow
+                                        style={{
+                                            height: (dense ? 33 : 53) * emptyRows,
+                                        }}
+                                    >
+                                        <TableCell colSpan={6} />
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
                     />
-                    <TextField
-                        margin="dense"
-                        id="name"
-                        name="name"
-                        label="Area name"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => onChange(e)}
-
-                    />
-
-
-
-
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={clickaddbutton}>Add</Button>
-                </DialogActions>
-            </Dialog>
-
-            <form >
-                <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
-                    <DialogTitle>Update employee informations</DialogTitle>
+                </Paper>
+                <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>Assign Employee to a zone</DialogTitle>
                     <DialogContent>
-                        <TextField
-                            margin="dense"
-                            id="name"
-                            label="code"
-                            name="code"
+
+                        <InputLabel id="demo-simple-select-label">Zone</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={zone}
+                            label="Area"
+                            onChange={handleChangezone}
                             fullWidth
-                            variant="standard"
-                            onChange={(e) => onChange(e)}
-                            defaultValue={clickedArea?.code}
+                        >
+                            <MenuItem value={1}> ---</MenuItem>
+                            {zonebyArea.map((zone, index) => (
+                                <MenuItem value={zone._id}> {zone.name}</MenuItem>
+                            ))}
+                        </Select>
 
-                        />
-                        <TextField
-                            margin="dense"
-                            id="name"
-                            name="name"
-                            label="Area name"
+
+                        <InputLabel id="demo-simple-select-label">Employee</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            value={employees}
+                            label="Employee"
+                            onChange={handleChangeEmployee}
                             fullWidth
-                            variant="standard"
-                            onChange={(e) => onChange(e)}
-                            defaultValue={clickedArea?.name}
+                        >
+                            <MenuItem value={1}> ---</MenuItem>
+                            {employeesarray.map((e, index) => (
+                                <MenuItem value={e.employee._id}> {e.employee.firstName} {e.employee.lastName}</MenuItem>
+                            ))}
 
+                        </Select>
+                        <br />
+                        <br />
+
+                        <DesktopDatePicker
+                            label="Date debut"
+                            inputFormat="MM/dd/yyyy"
+                            value={Datedebut}
+                            onChange={handleChangeDatedebut}
+                            renderInput={(params) => <TextField {...params} />}
                         />
 
-
+                        <DesktopDatePicker
+                            label="Date fin"
+                            inputFormat="MM/dd/yyyy"
+                            value={Datefin}
+                            onChange={handleChangeDatefin}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
 
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseupdateemployee}>Cancel</Button>
-                        <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button onClick={clickaddbutton}>Add</Button>
                     </DialogActions>
                 </Dialog>
-            </form>
-        </Box>
+
+                <form >
+                    <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
+                        <DialogTitle>Update employee informations</DialogTitle>
+                        <DialogContent>
+                            <TextField
+                                margin="dense"
+                                id="name"
+                                label="code"
+                                name="code"
+                                fullWidth
+                                variant="standard"
+                                onChange={(e) => onChange(e)}
+                                defaultValue={clickedArea?.code}
+
+                            />
+                            <TextField
+                                margin="dense"
+                                id="name"
+                                name="name"
+                                label="Area name"
+                                fullWidth
+                                variant="standard"
+                                onChange={(e) => onChange(e)}
+                                defaultValue={clickedArea?.name}
+
+                            />
+
+
+
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseupdateemployee}>Cancel</Button>
+                            <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                        </DialogActions>
+                    </Dialog>
+                </form>
+            </Box>
+        </LocalizationProvider>
+
     );
 }

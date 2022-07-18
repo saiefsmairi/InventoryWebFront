@@ -181,8 +181,6 @@ export default function Area() {
     const [companyDetails, setcompanyDetails] = useState([]);
     const [clickedArea, setclickedArea] = React.useState('');
 
-    const { code, name } = formData;
-
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
 
