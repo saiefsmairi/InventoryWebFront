@@ -442,7 +442,7 @@ export default function Area() {
 
             <form >
                 <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
-                    <DialogTitle>Update employee informations</DialogTitle>
+                    <DialogTitle>Update Area informations</DialogTitle>
                     <DialogContent>
                         <TextField
                             margin="dense"

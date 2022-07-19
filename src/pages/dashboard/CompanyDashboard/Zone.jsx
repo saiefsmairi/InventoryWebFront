@@ -166,9 +166,10 @@ export default function Zone() {
         (state) => state.auth
     )
 
-    const [data, setData] = useState({
-        areaid: "",
-        areaid: "",
+    const [dataToDelete, setdataToDelete] = useState({
+        zoneid: "",
+        companyid: "",
+        areaid:""
     });
 
 
@@ -331,24 +332,23 @@ export default function Zone() {
         })
             .catch(function (error) {
                 console.log(error)
-
-
             })
 
     };
 
     const handleClickDelete = (row) => {
-        data.areaid = row._id;
-        data.areaid = companyDetails._id;
-        console.log(data)
+        console.log(row)
+        dataToDelete.zoneid = row._id;
+        dataToDelete.companyid = companyDetails._id;
+        dataToDelete.areaid = row.area;
 
-        axios.put("http://localhost:5000/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("http://localhost:5000/zone/updateZone/RemoveZoneFromArea", dataToDelete, { headers: { Authorization: AuthStr } }).then(function (response) {
             if (response) {
                 console.log(response)
                 testrows = []
                 getcompanybyadmin()
 
-                axios.delete("http://localhost:5000/area/deletearea/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+                axios.delete("http://localhost:5000/zone/deletezone/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
                     console.log(res.data)
                     console.log("area deleted")
                     getcompanybyadmin()
@@ -356,7 +356,7 @@ export default function Zone() {
                 }).catch(function (error) {
                     console.log(error.response.data)
 
-                })
+                }) 
             }
 
         })
@@ -407,14 +407,14 @@ export default function Zone() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {row.zones.map((historyRow) => (
+                                        {row.zones?.map((historyRow) => (
                                             <TableRow key={historyRow._id}>
                                                 <TableCell component="th" scope="row">
-                                                    {historyRow.zone.code}
+                                                    {historyRow.zone?.code}
                                                 </TableCell>
-                                                <TableCell>{historyRow.zone.name}</TableCell>
-                                                <TableCell><Button variant="contained">Update</Button>
-                                                    <Button variant="contained">Delete</Button>
+                                                <TableCell>{historyRow.zone?.name}</TableCell>
+                                                <TableCell><Button variant="contained" sx={{ mx: '10px' }}>Update</Button>
+                                                    <Button variant="contained" onClick={() => handleClickDelete(historyRow.zone)}>Delete</Button>
                                                 </TableCell>
 
                                             </TableRow>
