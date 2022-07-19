@@ -41,7 +41,8 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -186,6 +187,7 @@ export default function AffectUsersZone() {
     const [open, setOpen] = React.useState(false);
     const handleOpen = () => {
         setOpen(true);
+        console.log("wiw1")
         FindZoneByArea()
     }
     const handleClose = () => {
@@ -260,22 +262,16 @@ export default function AffectUsersZone() {
     function FindAreaAndTheirZonesByCompany(data) {
         axios.get("http://localhost:5000/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
             res.data.forEach(element => {
-
-
             });
-
             // setareaselect(areas)
-
         }).catch(function (error) {
             console.log(error)
         })
     }
 
     function findAffectationByCompany(company) {
-        console.log("wiww")
         axios.get("http://localhost:5000/affectation/" + company._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
-
 
             res.data.forEach(element => {
                 testrows.push(element)
@@ -287,11 +283,8 @@ export default function AffectUsersZone() {
         })
     }
 
-
     const clickaddbutton = async (e) => {
         e.preventDefault();
-
-        // getcompanybyadmin()
         formData.Datedebut = Datedebut
         formData.Datefin = Datefin
         formData.zone = zone
@@ -348,21 +341,32 @@ export default function AffectUsersZone() {
     const handleClickUpdateOpen = (row) => {
         setclickedArea(row)
         setFormData({
-            code: row.code,
-            name: row.name,
+            zone: row.zone._id,
+            employee: row.employee._id,
+            Datedebut: row.Datedebut,
+            Datefin: row.Datefin,
+
         });
         setopenupdateemployee(true);
-
+        FindZoneByArea()
     };
 
 
     const clickupdatebutton = async (e) => {
         e.preventDefault();
+        if (zone !== 1) {
+            formData.zone = zone
+        }
+        if (employees !== 1) {
+            formData.employee = employees
+        }
         console.log(formData)
 
-        console.log("clicked on update")
-        axios.put("http://localhost:5000/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
-            testrows = []
+
+        axios.put("http://localhost:5000/affectation/updateaffectation/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            toast.success('Affectation updated successfully !', {
+                position: toast.POSITION.TOP_RIGHT
+            });
             getcompanybyadmin()
             setopenupdateemployee(false);
         })
@@ -372,33 +376,19 @@ export default function AffectUsersZone() {
     };
 
     const handleClickDelete = (row) => {
-        data.areaid = row._id;
-        data.companyid = companyDetails._id;
-        console.log(data)
+        axios.delete("http://localhost:5000/affectation/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            console.log("affectation deleted")
+            toast.success('Affectation deleted successfully !', {
+                position: toast.POSITION.TOP_RIGHT
+            });
+            getcompanybyadmin()
 
-        axios.put("http://localhost:5000/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
-            if (response) {
-                console.log(response)
-                testrows = []
-                getcompanybyadmin()
-
-                axios.delete("http://localhost:5000/area/deletearea/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
-                    console.log(res.data)
-                    console.log("area deleted")
-                    getcompanybyadmin()
-
-                }).catch(function (error) {
-                    console.log(error.response.data)
-
-                })
-            }
-
+        }).catch(function (error) {
+            console.log(error)
         })
-            .catch(function (error) {
-                console.log(error)
-
-            })
     };
+
 
     //dialogue assign new employee and zone
     const [zone, setzone] = React.useState(1);
@@ -412,6 +402,7 @@ export default function AffectUsersZone() {
         setemployee(event.target.value);
     };
 
+    //prob onchange update
     const [Datedebut, setDatedebut] = React.useState(new Date());
     const [Datefin, setDatefin] = React.useState(new Date());
 
@@ -472,7 +463,7 @@ export default function AffectUsersZone() {
                                                 >
                                                     {row?.employee.firstName}   {row?.employee.lastName}
                                                 </TableCell>
-                                                <TableCell align="right">{row?.zone.name}</TableCell>
+                                                <TableCell align="right">{row.zone?.name}</TableCell>
                                                 <TableCell align="right">{row?.Datedebut}</TableCell>
                                                 <TableCell align="right">{row?.Datefin}</TableCell>
 
@@ -519,6 +510,7 @@ export default function AffectUsersZone() {
                             id="demo-simple-select"
                             value={zone}
                             label="Area"
+                            name="zone"
                             onChange={handleChangezone}
                             fullWidth
                         >
@@ -534,6 +526,7 @@ export default function AffectUsersZone() {
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
                             value={employees}
+                            name="employee"
                             label="Employee"
                             onChange={handleChangeEmployee}
                             fullWidth
@@ -574,30 +567,61 @@ export default function AffectUsersZone() {
                     <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
                         <DialogTitle>Update employee informations</DialogTitle>
                         <DialogContent>
+                            <InputLabel id="demo-simple-select-label">Zone</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={zone}
+                                label="Area"
+                                onChange={handleChangezone}
+                                fullWidth
+                            >
+                                <MenuItem value={1}> ---</MenuItem>
+                                {zonebyArea.map((zone, index) => (
+                                    <MenuItem value={zone._id}> {zone.name}</MenuItem>
+                                ))}
+                            </Select>
+
+
+                            <InputLabel id="demo-simple-select-label">Employee</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={employees}
+                                label="Employee"
+                                onChange={handleChangeEmployee}
+                                fullWidth
+                            >
+                                <MenuItem value={1}> ---</MenuItem>
+                                {employeesarray.map((e, index) => (
+                                    <MenuItem value={e.employee._id}> {e.employee.firstName} {e.employee.lastName}</MenuItem>
+                                ))}
+
+                            </Select>
+                            <br />
+                            <br />
+
                             <TextField
+                                type="date"
                                 margin="dense"
                                 id="name"
-                                label="code"
-                                name="code"
-                                fullWidth
+                                name="Datedebut"
+                                label="Date debut"
                                 variant="standard"
                                 onChange={(e) => onChange(e)}
-                                defaultValue={clickedArea?.code}
+                                defaultValue={clickedArea?.Datedebut}
 
                             />
                             <TextField
+                                type="date"
                                 margin="dense"
                                 id="name"
-                                name="name"
-                                label="Area name"
-                                fullWidth
+                                name="Datefin"
+                                label="Date fin"
                                 variant="standard"
                                 onChange={(e) => onChange(e)}
-                                defaultValue={clickedArea?.name}
-
+                                defaultValue={clickedArea?.Datefin}
                             />
-
-
 
                         </DialogContent>
                         <DialogActions>
@@ -607,6 +631,7 @@ export default function AffectUsersZone() {
                     </Dialog>
                 </form>
             </Box>
+            <ToastContainer />
         </LocalizationProvider>
 
     );
