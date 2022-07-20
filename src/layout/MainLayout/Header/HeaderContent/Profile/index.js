@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
-import { useRef, useState ,useEffect } from 'react';
+import { useRef, useState ,useEffect,useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout, reset } from 'store/reducers/authslice';
 import axios from 'axios'
-
+import { createAvatar } from '@dicebear/avatars';
+import * as style from '@dicebear/avatars-initials-sprites';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import {
@@ -57,12 +58,14 @@ function a11yProps(index) {
 
 // ==============================|| HEADER CONTENT - PROFILE ||============================== //
 
+
 const Profile = () => {
     const theme = useTheme();
     const navigate = useNavigate()
     const dispatch = useDispatch()
     //get user from localstorage
     const { user } = useSelector((state) => state.auth)
+    const AuthStr = 'Bearer '.concat(user?.token);
 
     // logout
     const handleLogout = async () => {
@@ -90,11 +93,10 @@ const Profile = () => {
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
-    const AuthStr = 'Bearer '.concat(user.token);
+  
 
     useEffect(() => {
-        
+        if(user){
         axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
 
             console.log(res.data)
@@ -105,9 +107,19 @@ const Profile = () => {
 
         })
         
-     
+    }
 
     }, [])
+ 
+    
+    const avatar = useMemo(() => {
+        return createAvatar(style, {
+          dataUri: true,
+          size: 128,
+          seed:JSON.parse(localStorage.getItem("user"))?.firstName
+        });
+      }, []);
+
 
     const iconBackColorOpen = 'grey.300';
 
@@ -127,7 +139,7 @@ const Profile = () => {
                 onClick={handleToggle}
             >
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 0.5 }}>
-                    <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
+                    <Avatar alt="profile user" src={avatar} sx={{ width: 32, height: 32 }} />
                     <Typography variant="subtitle1">{userLoggedIn.firstName} {userLoggedIn.lastName}</Typography>
                 </Stack>
             </ButtonBase>
@@ -169,7 +181,7 @@ const Profile = () => {
                                             <Grid container justifyContent="space-between" alignItems="center">
                                                 <Grid item>
                                                     <Stack direction="row" spacing={1.25} alignItems="center">
-                                                        <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
+                                                        <Avatar alt="profile user" src={avatar} sx={{ width: 32, height: 32 }} />
                                                         <Stack>
                                                             <Typography variant="h6">{userLoggedIn.firstName} {userLoggedIn.lastName}</Typography>
                                                             <Typography variant="body2" color="textSecondary">

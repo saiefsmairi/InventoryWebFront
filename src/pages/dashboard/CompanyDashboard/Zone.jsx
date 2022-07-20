@@ -312,8 +312,9 @@ export default function Zone() {
         setFormData({
             code: row.code,
             name: row.name,
-        });
+        }); 
         setopenupdateemployee(true);
+
 
     };
 
@@ -323,17 +324,15 @@ export default function Zone() {
         console.log(formData)
 
         console.log("clicked on update")
-        axios.put("http://localhost:5000/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+         axios.put("http://localhost:5000/zone/updatezone/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setopenupdateemployee(false);
-
-
         })
             .catch(function (error) {
                 console.log(error)
             })
-
+ 
     };
 
     const handleClickDelete = (row) => {
@@ -413,7 +412,7 @@ export default function Zone() {
                                                     {historyRow.zone?.code}
                                                 </TableCell>
                                                 <TableCell>{historyRow.zone?.name}</TableCell>
-                                                <TableCell><Button variant="contained" sx={{ mx: '10px' }}>Update</Button>
+                                                <TableCell><Button variant="contained" sx={{ mx: '10px' }} onClick={() => handleClickUpdateOpen((historyRow.zone))}>Update</Button>
                                                     <Button variant="contained" onClick={() => handleClickDelete(historyRow.zone)}>Delete</Button>
                                                 </TableCell>
 
