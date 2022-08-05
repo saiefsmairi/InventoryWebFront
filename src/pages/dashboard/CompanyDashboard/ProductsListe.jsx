@@ -44,6 +44,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { InputLabel } from '@mui/material';
 
 import Avatar from '@mui/material/Avatar';
+import { array } from 'yup';
 const style = {
     position: 'absolute',
     top: '50%',
@@ -58,7 +59,8 @@ const style = {
 };
 
 var testrows = []
-
+var areas = []
+var wiw=[]
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -91,10 +93,16 @@ function stableSort(array, comparator) {
 }
 const headCells = [
     {
-        id: 'name',
+        id: 'code',
         numeric: false,
         disablePadding: true,
         label: 'Code',
+    },
+    {
+        id: 'name',
+        numeric: true,
+        disablePadding: true,
+        label: 'Name',
     },
     {
         id: 'calories',
@@ -115,10 +123,10 @@ const headCells = [
         label: 'Zone',
     },
     {
-        id: 'protein',
+        id: 'employee',
         numeric: true,
         disablePadding: false,
-        label: 'Email',
+        label: 'Employee',
     },
     {
         id: 'etat',
@@ -242,6 +250,7 @@ EnhancedTableToolbar.propTypes = {
 export default function ProductsListe() {
     const [rows, setRows] = useState([])
     const [openNotifUpdateEmployee, setopenNotifUpdateEmployee] = useState(false);
+    const [areaselect, setareaselect] = React.useState([])
 
     const [data, setData] = useState({
         userid: "",
@@ -251,20 +260,18 @@ export default function ProductsListe() {
     function getcompanybyadmin() {
         axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
-
-                setHavecompany(false)
+                console.log("no company for this user")
             }
             else {
                 console.log(res.data[0])
-                setHavecompany(true)
                 setcompanyDetails(res.data[0])
-                res.data[0].employees.forEach(element => {
+                testrows = []
 
-
-                    testrows.push(element.employee)
+                res.data[0].areas.forEach(element => {
+                    areas.push(element.area._id)
                 });
-                setRows(testrows)
-
+                setareaselect(areas)
+                FindZoneByArea(areas)
             }
 
         }).catch(function (error) {
@@ -272,6 +279,45 @@ export default function ProductsListe() {
         })
     }
 
+    //hedhi andha comme input les area w bech trajaa les zones 
+    function FindZoneByArea(areastab) {
+        console.log(areastab)
+        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areastab }, { headers: { Authorization: AuthStr } }).then((res) => {
+            FindZoneByArea2(res.data)
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+        //hedhi andha comme input les zones w bech trajaa les id des produits 
+    function FindZoneByArea2(zones) {
+        console.log(zones)
+        axios.post("http://localhost:5000/zone/getzonebyarea2", { data: zones }, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            res.data.forEach(element => {
+                element.forEach(x => {
+                    FindProductsById(x)
+                });
+            });
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    function FindProductsById(x) {
+        console.log(x)
+    
+        axios.post("http://localhost:5000/product/FindProductsById", { data: x }, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            wiw.push(res.data[0])
+            console.log('wiw',wiw)
+            setRows([...wiw])
+        }).catch(function (error) {
+            console.log(error)
+        })
+ 
+    }
 
     const [Havecompany, setHavecompany] = useState(true);
     const [companyDetails, setcompanyDetails] = useState([]);
@@ -511,6 +557,7 @@ export default function ProductsListe() {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
+                               
                                     const isItemSelected = isSelected(row.firstName);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -520,7 +567,7 @@ export default function ProductsListe() {
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.firstName}
+                                            key={row._id}
                                             selected={isItemSelected}
                                         >
                                             <TableCell padding="checkbox">
@@ -532,12 +579,13 @@ export default function ProductsListe() {
                                                 scope="row"
                                                 padding="none"
                                             >
-                                                {row.firstName}
+                                                {row.code}
                                             </TableCell>
-                                            <TableCell align="right">{row.lastName}</TableCell>
-                                            <TableCell align="right">{row.role}</TableCell>
-                                            <TableCell align="right">{row.phone}</TableCell>
-                                            <TableCell align="right">{row.email}</TableCell>
+                                            <TableCell align="right">{row.name}</TableCell>
+                                            <TableCell align="right">{row.quantity}</TableCell>
+                                            <TableCell align="right">{row.price} DT</TableCell>
+                                            <TableCell align="right">{row.zone.name}</TableCell>
+                                            <TableCell align="right">{row.employee.firstName} {row.employee.lastName}</TableCell>
 
                                             <TableCell align="right">
                                                 <Button variant="contained" onClick={() => handleClickopenupdateemployee(row)} sx={{ mx: '10px' }} >

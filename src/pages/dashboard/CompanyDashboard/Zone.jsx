@@ -501,9 +501,9 @@ export default function Zone() {
                         onChange={handleChange}
                         fullWidth
                     >
-                        {areas.map((area, index) => (
+                        {areas?.map((area, index) => (
 
-                            <MenuItem value={area._id}> {area.name}</MenuItem>
+                            <MenuItem value={area?._id}> {area?.name}</MenuItem>
                         ))}
                     </Select>
 
