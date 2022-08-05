@@ -46,22 +46,7 @@ const MainRoutes = {
                 }
             ]
         },
-        {
-            path: 'sample-page',
-            element: <SamplePage />
-        },
-        {
-            path: 'shadow',
-            element: <Shadow />
-        },
-        {
-            path: 'typography',
-            element: <Typography />
-        },
-        {
-            path: 'icons/ant',
-            element: <AntIcons />
-        },
+
         {
             path: 'affectuserszone',
             element: <AffectUsersZone />
@@ -74,19 +59,19 @@ const MainRoutes = {
         {
             path: 'users',
             element: <UsersAdmin />
-        }  ,
+        },
         {
             path: 'companyemployees',
             element: <CompanyUsers />
-        }  ,
+        },
         {
             path: 'products',
             element: <ProductsListe />
-        } ,
+        },
         {
             path: 'area',
             element: <Area />
-        } ,
+        },
         {
             path: 'zone',
             element: <Zone />

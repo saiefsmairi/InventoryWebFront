@@ -13,37 +13,54 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { useEffect, useState } from 'react';
+import Modal from '@mui/material/Modal';
+import TextField from '@mui/material/TextField';
+
 import { visuallyHidden } from '@mui/utils';
 import Button from '@mui/material/Button';
 import { DeleteOutlined } from '@ant-design/icons';
-import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import { Link as RouterLink } from 'react-router-dom';
-import Modal from '@mui/material/Modal';
-import { strengthColor, strengthIndicator } from 'utils/password-strength';
-import AnimateButton from 'components/@extended/AnimateButton';
-// material-ui
+import AddCompanyEmployee from './AddCompanyEmployee';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import axios from 'axios'
+import Dialog from '@mui/material/Dialog';
+import Input from '@mui/material/Input';
+import InputAdornment from '@mui/material/InputAdornment';
+
 import {
-
-    Divider,
-    FormControl,
-    FormHelperText,
-    Grid,
-    Link,
-    InputAdornment,
-    InputLabel,
-    OutlinedInput,
-    Stack,
+    Alert,
+    Snackbar
 } from '@mui/material';
-import AddProduct from './AddProduct';
 
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import { InputLabel } from '@mui/material';
+
+import Avatar from '@mui/material/Avatar';
+import { array } from 'yup';
+const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid white',
+    boxShadow: 24,
+
+    p: 4,
+};
+
+var testrows = []
+var areas = []
+var wiw=[]
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -74,11 +91,16 @@ function stableSort(array, comparator) {
     });
     return stabilizedThis.map((el) => el[0]);
 }
-
 const headCells = [
     {
-        id: 'name',
+        id: 'code',
         numeric: false,
+        disablePadding: true,
+        label: 'Code',
+    },
+    {
+        id: 'name',
+        numeric: true,
         disablePadding: true,
         label: 'Name',
     },
@@ -86,25 +108,25 @@ const headCells = [
         id: 'calories',
         numeric: true,
         disablePadding: false,
-        label: 'Code',
+        label: 'Quantity',
     },
     {
         id: 'fat',
         numeric: true,
         disablePadding: false,
-        label: 'Quantity',
+        label: 'Unit Price ',
     },
     {
         id: 'carbs',
         numeric: true,
         disablePadding: false,
-        label: 'Company',
+        label: 'Zone',
     },
     {
-        id: 'prixunitaire',
+        id: 'employee',
         numeric: true,
         disablePadding: false,
-        label: 'Unite price',
+        label: 'Employee',
     },
     {
         id: 'etat',
@@ -121,21 +143,11 @@ function EnhancedTableHead(props) {
         onRequestSort(event, property);
     };
 
-
-
     return (
         <TableHead>
             <TableRow>
                 <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': 'select all desserts',
-                        }}
-                    />
+
                 </TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
@@ -175,6 +187,7 @@ EnhancedTableHead.propTypes = {
 const EnhancedTableToolbar = (props) => {
     const { numSelected } = props;
 
+
     return (
         <Toolbar
             sx={{
@@ -197,12 +210,12 @@ const EnhancedTableToolbar = (props) => {
                 </Typography>
             ) : (
                 <Typography
-                    sx={{ flex: '1 1 100%' }}
+
                     variant="h6"
                     id="tableTitle"
                     component="div"
                 >
-                    Liste Of Products
+
                 </Typography>
             )}
 
@@ -227,61 +240,104 @@ EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid white',
-    boxShadow: 24,
 
-    p: 4,
-};
+//delete dialog
+
+
+
+//////////////////
 
 export default function ProductsListe() {
+    const [rows, setRows] = useState([])
+    const [openNotifUpdateEmployee, setopenNotifUpdateEmployee] = useState(false);
+    const [areaselect, setareaselect] = React.useState([])
 
-    const rows = [{
-        "name": "Donut1",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "prixunitaire":10
-    }, {
-        "name": "Donut",
-        "calories": 452,
-        "fat": 25,
-        "carbs": 51,
-        "protein": 4.9,
-        "prixunitaire":10
+    const [data, setData] = useState({
+        userid: "",
+        companyid: "",
+    });
 
-    }];
+    function getcompanybyadmin() {
+        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            if (typeof res.data[0] === 'undefined') {
+                console.log("no company for this user")
+            }
+            else {
+                console.log(res.data[0])
+                setcompanyDetails(res.data[0])
+                testrows = []
 
-    React.useEffect(() => {
-        console.log(rows)
+                res.data[0].areas.forEach(element => {
+                    areas.push(element.area._id)
+                });
+                setareaselect(areas)
+                FindZoneByArea(areas)
+            }
 
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
 
-    }, [rows])
+    //hedhi andha comme input les area w bech trajaa les zones 
+    function FindZoneByArea(areastab) {
+        console.log(areastab)
+        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areastab }, { headers: { Authorization: AuthStr } }).then((res) => {
+            FindZoneByArea2(res.data)
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
 
+        //hedhi andha comme input les zones w bech trajaa les id des produits 
+    function FindZoneByArea2(zones) {
+        console.log(zones)
+        axios.post("http://localhost:5000/zone/getzonebyarea2", { data: zones }, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            res.data.forEach(element => {
+                element.forEach(x => {
+                    FindProductsById(x)
+                });
+            });
 
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    function FindProductsById(x) {
+        console.log(x)
+    
+        axios.post("http://localhost:5000/product/FindProductsById", { data: x }, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            wiw.push(res.data[0])
+            console.log('wiw',wiw)
+            setRows([...wiw])
+        }).catch(function (error) {
+            console.log(error)
+        })
+ 
+    }
+
+    const [Havecompany, setHavecompany] = useState(true);
+    const [companyDetails, setcompanyDetails] = useState([]);
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('calories');
+    const [orderBy, setOrderBy] = React.useState('');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const { user } = useSelector(
+        (state) => state.auth
+    )
+    const AuthStr = 'Bearer '.concat(user.token);
 
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
+        console.log(property)
         setOrderBy(property);
     };
 
@@ -326,23 +382,147 @@ export default function ProductsListe() {
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
-    const updateproduct = (id) => {
-        console.log(id)
-    };
-
-    const deleteproduct = (id) => {
-        console.log(id)
-    };
-
     // Avoid a layout jump when reaching the last page with empty rows.
-
     const emptyRows =
         page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        testrows = []
+        setOpen(false);
+        getcompanybyadmin()
+    }
+
+    const handleCloseupdateAlert = () => {
+        setopenNotifUpdateEmployee(false)
+
+    }
+
+    useEffect(() => {
+        getcompanybyadmin()
+
+    }, [])
+
+
+    //delete employee section
+    const [opendelete, setopendelete] = React.useState(false);
+    const [clickedemployee, setclickedemployee] = React.useState('');
+
+    const handleClickOpen1 = (row) => {
+        setopendelete(true);
+        setclickedemployee(row)
+    };
+
+    const handleCloseDelete = (value) => {
+        setopendelete(false);
+
+    };
+
+    const handleDeleteMethod = (row) => {
+        console.log(clickedemployee)
+
+        data.userid = clickedemployee._id;
+        data.companyid = companyDetails._id;
+        console.log(data)
+
+        axios.put("http://localhost:5000/company/updateCompany/RemoveEmployeeFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
+            console.log(response)
+            testrows = []
+            setopendelete(false);
+
+            getcompanybyadmin()
+
+        })
+            .catch(function (error) {
+                console.log(error)
+
+            })
+
+
+        axios.delete("http://localhost:5000/users/" + clickedemployee._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            console.log("user deleted")
+
+
+
+        }).catch(function (error) {
+            console.log(error.response.data)
+
+        })
+    };
+
+    //update employee
+
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        password: "",
+        showPassword: false,
+
+    });
+
+    const { firstName, lastName, email, phone, password } = formData;
+
+    const [openupdateemployee, setopenupdateemployee] = React.useState(false);
+    const [responseAddEmployetoCompany, setresponseAddEmployetoCompany] = useState('');
+
+    const onChange = (e) =>
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+
+
+    const handleClickopenupdateemployee = (row) => {
+        console.log(row)
+        setclickedemployee(row)
+        setFormData({
+            firstName: row.firstName,
+            lastName: row.lastName,
+            email: row.email,
+            phone: row.phone,
+        });
+        setopenupdateemployee(true);
+    };
+
+    const handleCloseupdateemployee = () => {
+        setopenupdateemployee(false);
+
+    };
+
+    const clickupdatebutton = async (e) => {
+        e.preventDefault();
+        axios.put("http://localhost:5000/users/updateuser/" + clickedemployee._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+            testrows = []
+            getcompanybyadmin()
+            setopenupdateemployee(false);
+            setresponseAddEmployetoCompany("update done")
+            setopenNotifUpdateEmployee(true)
+
+        })
+            .catch(function (error) {
+                console.log(error.response.data.message)
+                setresponseAddEmployetoCompany(error.response.data.message)
+                setopenNotifUpdateEmployee(true)
+
+            })
+
+    };
+
+    //password EyeOutlined
+    const handleClickShowPassword = () => {
+        setFormData({
+            ...formData,
+            showPassword: !formData.showPassword,
+        });
+    };
+
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
 
     return (
         <Box sx={{ width: '100%' }}>
-            <Button variant="contained" onClick={handleOpen} >Add new product</Button>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -350,7 +530,9 @@ export default function ProductsListe() {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    <AddProduct />
+                    <AddCompanyEmployee companyDetails={companyDetails}
+                    />
+
                 </Box>
             </Modal>
             <Paper sx={{ width: '100%', mb: 2 }}>
@@ -375,27 +557,21 @@ export default function ProductsListe() {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
+                               
+                                    const isItemSelected = isSelected(row.firstName);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
                                     return (
                                         <TableRow
                                             hover
-                                            onClick={(event) => handleClick(event, row.name)}
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.name}
+                                            key={row._id}
                                             selected={isItemSelected}
                                         >
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    color="primary"
-                                                    checked={isItemSelected}
-                                                    inputProps={{
-                                                        'aria-labelledby': labelId,
-                                                    }}
-                                                />
+
                                             </TableCell>
                                             <TableCell
                                                 component="th"
@@ -403,18 +579,21 @@ export default function ProductsListe() {
                                                 scope="row"
                                                 padding="none"
                                             >
-                                                {row.name}
+                                                {row.code}
                                             </TableCell>
-                                            <TableCell align="right">{row.calories}</TableCell>
-                                            <TableCell align="right">{row.fat}</TableCell>
-                                            <TableCell align="right">{row.carbs}</TableCell>
-                                            <TableCell align="right">{row.prixunitaire}</TableCell>
+                                            <TableCell align="right">{row.name}</TableCell>
+                                            <TableCell align="right">{row.quantity}</TableCell>
+                                            <TableCell align="right">{row.price} DT</TableCell>
+                                            <TableCell align="right">{row.zone.name}</TableCell>
+                                            <TableCell align="right">{row.employee.firstName} {row.employee.lastName}</TableCell>
 
-
-                                            
-                                            <TableCell align="right" style={{ marginLeft: "10px" }}>
-                                                <Button variant="contained" color="success" onClick={() => updateproduct(row)}>Update</Button>
-                                                <Button variant="contained" onClick={() => deleteproduct(row)}>Delete</Button>
+                                            <TableCell align="right">
+                                                <Button variant="contained" onClick={() => handleClickopenupdateemployee(row)} sx={{ mx: '10px' }} >
+                                                    Update
+                                                </Button>
+                                                <Button variant="contained" onClick={() => handleClickOpen1(row)}  >
+                                                    Delete
+                                                </Button>
 
                                             </TableCell>
 
@@ -443,6 +622,106 @@ export default function ProductsListe() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+
+            <Dialog
+                open={opendelete}
+                onClose={handleCloseDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Are you sure you want to delete this employee ?"}
+                </DialogTitle>
+
+                <DialogActions>
+                    <Button onClick={handleCloseDelete}>Cancel</Button>
+                    <Button onClick={handleDeleteMethod} >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            <form >
+                <Dialog open={openupdateemployee} onClose={handleCloseupdateemployee}>
+                    <DialogTitle>Update employee informations</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            margin="dense"
+                            id="name"
+                            label="Name"
+                            name="firstName"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.firstName}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="lastname"
+                            name="lastName"
+                            label="LastName"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.lastName}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="email"
+                            label="Email Address"
+                            type="email"
+                            name="email"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.email}
+                            onChange={(e) => onChange(e)}
+                        />
+                        <TextField
+                            margin="dense"
+                            id="phone"
+                            label="Phone"
+                            name="phone"
+                            fullWidth
+                            variant="standard"
+                            defaultValue={clickedemployee?.phone}
+                            onChange={(e) => onChange(e)}
+                        />
+
+
+                        <label htmlFor="password">Password</label>
+                        <Input
+                            id="standard-adornment-password"
+                            type={formData.showPassword ? 'text' : 'password'}
+                            label="Password"
+                            name="password"
+                            onChange={(e) => onChange(e)}
+                            margin="dense"
+                            fullWidth
+                            endAdornment={
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password EyeOutlined"
+                                        onClick={handleClickShowPassword}
+                                        onMouseDown={handleMouseDownPassword}
+                                    >
+                                        {formData.showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                                    </IconButton>
+                                </InputAdornment>
+                            }
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseupdateemployee}>Cancel</Button>
+                        <Button onClick={clickupdatebutton} type="submit" >Update</Button>
+                    </DialogActions>
+                </Dialog>
+            </form>
+
+            <Snackbar open={openNotifUpdateEmployee} autoHideDuration={6000} onClose={handleCloseupdateAlert}>
+                <Alert onClose={handleCloseupdateAlert} severity="info" sx={{ width: '100%' }}>
+                    {responseAddEmployetoCompany}
+                </Alert>
+            </Snackbar>
 
         </Box>
     );
