@@ -16,8 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import MuiAlert from '@mui/material/Alert';
 import axios from 'axios'
 import CircularProgress from '@mui/material/CircularProgress';
-import { useRef } from 'react';
-
 
 // material-ui
 import {
@@ -33,7 +31,6 @@ import {
     Snackbar,
 
 } from '@mui/material';
-import { createRef } from 'react';
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -42,31 +39,23 @@ const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary,
 }));
 
-const Img = styled('img')({
-    margin: 'auto',
-    display: 'block',
-    maxWidth: '100%',
-    maxHeight: '100%',
-});
+
 const Alert = forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-
-
 export default function Myprofil() {
     const [open, setOpen] = useState(false);
     const [openUpdateAlert, setOpenUpdateAlert] = useState(false);
+    const [openUpdateUserAlert, setopenUpdateUserAlert] = useState(false);
+    const [ErrorUpdateUser, setErrorUpdateUser] = useState(false);
+
     const [openEmptyFieldsAlert, setopenEmptyFieldsAlert] = useState(false);
-
     const [Havecompany, setHavecompany] = useState(true);
-
     const [companyDetails, setcompanyDetails] = useState();
     const [userLoggedIn, setuserLoggedIn] = useState('');
 
-    
-    const navigate = useNavigate()
-    const dispatch = useDispatch()
+
     const { user } = useSelector(
         (state) => state.auth
     )
@@ -78,18 +67,23 @@ export default function Myprofil() {
         country: "",
         postalcode: "",
     });
+    const [formDataUser, setformDataUser] = useState({
+        firstName: "",
+        lastName: "",
+        phone: "",
+        email: "",
+    });
 
     function getcompanybyadmin() {
+        console.log(user)
+        //i need to return phone and last name from back
         axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
-
             if (typeof res.data[0] === 'undefined') {
-
                 console.log('fi west undefined')
                 setHavecompany(false)
             }
             else {
                 setHavecompany(true)
-
                 setcompanyDetails(res.data[0])
                 console.log(res.data[0])
                 setFormData({
@@ -108,29 +102,33 @@ export default function Myprofil() {
     }
 
     useEffect(() => {
-        
         axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
-
             console.log(res.data)
             setuserLoggedIn(res.data)
+            setformDataUser({
+                firstName: res.data.firstName,
+                lastName: res.data.lastName,
+                phone: res.data.phone,
+                email: res.data.email,
+            });
 
         }).catch(function (error) {
             console.log(error)
 
         })
-        
         getcompanybyadmin()
 
     }, [])
-
-
 
     const { companyname, companyadress, city, country, postalcode, idcompanyadmin } = formData;
 
     const onChange = (e) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    const onSubmit = async (e) => {
 
+    const onChangeUser = (e) =>
+        setformDataUser({ ...formDataUser, [e.target.name]: e.target.value });
+
+    const onSubmit = async (e) => {
         e.preventDefault();
         if (Havecompany === false) {
             if (!city || !companyadress || !companyname || !country || !postalcode) {
@@ -150,8 +148,6 @@ export default function Myprofil() {
                     })
                 getcompanybyadmin()
             }
-
-
         }
 
         if (Havecompany) {
@@ -170,19 +166,30 @@ export default function Myprofil() {
 
     };
 
+    const updateUserButton = async () => {
+        console.log("clicked on updated")
+        console.log(formDataUser)
+        console.log(user._id)
+        axios.put("http://localhost:5000/users/updateAdminCompanyuser/wiw1/wiw/" + user._id, formDataUser).then(function (response) {
+            setopenUpdateUserAlert(true)
+            console.log(response)
+        })
+            .catch(function (error) {
+                console.log(error.response.data)
+                setErrorUpdateUser(true)
+            })
+    };
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-
         setOpen(false);
         setOpenUpdateAlert(false);
         setopenEmptyFieldsAlert(false)
-
+        setopenUpdateUserAlert(false)
+        setErrorUpdateUser(false)
     };
-
-
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -205,14 +212,14 @@ export default function Myprofil() {
                                     <InputLabel style={{
                                         fontWeight: 'bold'
                                     }} >First Name</InputLabel>
-                                    <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.firstName} />
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="firstName" defaultValue={userLoggedIn?.firstName} onChange={(e) => onChangeUser(e)} />
                                 </Grid>
 
                                 <Grid item xs={6} md={5}>
                                     <InputLabel style={{
                                         fontWeight: 'bold'
                                     }} >Last Name </InputLabel>
-                                    <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.lastName} />
+                                    <TextField fullWidth id="outlined-basic" variant="outlined" name="lastName" defaultValue={userLoggedIn?.lastName} onChange={(e) => onChangeUser(e)} />
                                 </Grid>
                             </Grid>
 
@@ -222,23 +229,20 @@ export default function Myprofil() {
                                     <InputLabel style={{
                                         fontWeight: 'bold'
                                     }} >Phone Number</InputLabel>
-                                    <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.phone} />
+                                    <TextField fullWidth id="outlined-basic" name="phone" variant="outlined" defaultValue={userLoggedIn?.phone} onChange={(e) => onChangeUser(e)} />
                                 </Grid>
 
                                 <Grid item xs={6} md={5}>
                                     <InputLabel style={{
                                         fontWeight: 'bold'
                                     }} >Email Adress</InputLabel>
-                                    <TextField fullWidth id="outlined-basic" variant="outlined" value={userLoggedIn?.email} />
+                                    <TextField fullWidth id="outlined-basic" name="email" variant="outlined" defaultValue={userLoggedIn?.email} onChange={(e) => onChangeUser(e)} />
                                 </Grid>
-
-
-
 
                             </Grid>
 
                             <Grid item xs container justifyContent="center" alignItems="center" >
-                                <Button variant="contained">Update</Button>
+                                <Button variant="contained" onClick={updateUserButton}>Update</Button>
                             </Grid>
 
                             <Grid item xs container spacing={2} sx={{ px: 1 }}>
@@ -353,7 +357,6 @@ export default function Myprofil() {
                 : <CircularProgress />
             }
 
-
             <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
                     company added successfully
@@ -369,9 +372,20 @@ export default function Myprofil() {
                     You have to complete empty fields
                 </Alert>
             </Snackbar>
-
+            <Snackbar open={openUpdateUserAlert} autoHideDuration={1000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="info" sx={{ width: '100%' }}>
+                    User updated successfully
+                </Alert>
+            </Snackbar>
+            <Snackbar open={ErrorUpdateUser} autoHideDuration={1000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+                    User with that email already exists
+                </Alert>
+            </Snackbar>
         </Box>
     );
     ;
 
 }
+
+
