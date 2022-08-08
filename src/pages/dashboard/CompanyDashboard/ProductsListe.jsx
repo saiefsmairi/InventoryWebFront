@@ -45,6 +45,8 @@ import { InputLabel } from '@mui/material';
 
 import Avatar from '@mui/material/Avatar';
 import { array } from 'yup';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import PdfListProducts from './PdfListProducts';
 const style = {
     position: 'absolute',
     top: '50%',
@@ -60,7 +62,7 @@ const style = {
 
 var testrows = []
 var areas = []
-var wiw=[]
+var wiw = []
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -289,7 +291,7 @@ export default function ProductsListe() {
         })
     }
 
-        //hedhi andha comme input les zones w bech trajaa les id des produits 
+    //hedhi andha comme input les zones w bech trajaa les id des produits 
     function FindZoneByArea2(zones) {
         console.log(zones)
         axios.post("http://localhost:5000/zone/getzonebyarea2", { data: zones }, { headers: { Authorization: AuthStr } }).then((res) => {
@@ -307,16 +309,16 @@ export default function ProductsListe() {
 
     function FindProductsById(x) {
         console.log(x)
-    
+
         axios.post("http://localhost:5000/product/FindProductsById", { data: x }, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             wiw.push(res.data[0])
-            console.log('wiw',wiw)
+            console.log('wiw', wiw)
             setRows([...wiw])
         }).catch(function (error) {
             console.log(error)
         })
- 
+
     }
 
     const [Havecompany, setHavecompany] = useState(true);
@@ -537,7 +539,7 @@ export default function ProductsListe() {
             </Modal>
             <Paper sx={{ width: '100%', mb: 2 }}>
                 <EnhancedTableToolbar numSelected={selected.length} />
-                <TableContainer>
+                <TableContainer >
                     <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
@@ -557,7 +559,7 @@ export default function ProductsListe() {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                               
+
                                     const isItemSelected = isSelected(row.firstName);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -622,7 +624,12 @@ export default function ProductsListe() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
+            <PDFDownloadLink document={<PdfListProducts prods={wiw}/>} fileName="Products">
+                <Button variant="contained" sx={{ mx: '10px' }} >
+                    Download Products as PDF
+                </Button>
 
+            </PDFDownloadLink>
             <Dialog
                 open={opendelete}
                 onClose={handleCloseDelete}
