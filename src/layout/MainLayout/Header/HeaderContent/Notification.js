@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { io } from "socket.io-client";
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -26,6 +27,7 @@ import Transitions from 'components/@extended/Transitions';
 
 // assets
 import { BellOutlined, CloseOutlined, GiftOutlined, MessageOutlined, SettingOutlined } from '@ant-design/icons';
+import { useSelector, useDispatch } from 'react-redux';
 
 // sx styles
 const avatarSX = {
@@ -52,6 +54,24 @@ const Notification = () => {
 
     const anchorRef = useRef(null);
     const [open, setOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const { user } = useSelector(
+        (state) => state.auth
+    )
+    const AuthStr = 'Bearer '.concat(user.token);
+    useEffect(() => {
+        console.log( user._id)
+        const socket = io("http://localhost:4000");
+        socket.emit("newUser", user);
+
+        socket.on("getNotification", (data) => {
+            console.log("+++++++")
+
+            console.log(data)
+            setNotifications((prev) => [...prev, data]);
+        });
+    }, []);
+
     const handleToggle = () => {
         setOpen((prevOpen) => !prevOpen);
     };
@@ -67,6 +87,7 @@ const Notification = () => {
     const iconBackColor = 'grey.100';
 
     return (
+        
         <Box sx={{ flexShrink: 0, ml: 0.75 }}>
             <IconButton
                 disableRipple
@@ -277,3 +298,9 @@ const Notification = () => {
 };
 
 export default Notification;
+{/* <div>
+dddddddddd
+{notifications.map((person, index) => (
+<p>Hello, {person.text} !</p>
+))}
+</div> */}
