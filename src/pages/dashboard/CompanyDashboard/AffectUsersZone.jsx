@@ -95,13 +95,13 @@ const headCells = [
         id: 'datedebut',
         numeric: true,
         disablePadding: false,
-        label: 'Date debut',
+        label: 'Starting Date ',
     },
     {
         id: 'datefin',
         numeric: true,
         disablePadding: false,
-        label: 'Date fin',
+        label: 'Ending Date',
     },
     {
         id: 'etat',
