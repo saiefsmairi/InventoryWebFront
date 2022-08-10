@@ -216,6 +216,7 @@ export default function Zone() {
     }, [])
 
     async function getcompanybyadmin() {
+        areas=[]
         axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log("no company for this user")

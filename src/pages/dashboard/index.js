@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // material-ui
 import {
@@ -33,6 +33,8 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
+import axios from 'axios'
+import { useSelector, useDispatch } from 'react-redux';
 
 // avatar style
 const avatarSX = {
@@ -68,10 +70,73 @@ const status = [
 ];
 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
-
-const DashboardDefault = () => {
+var areas = []
+export default function DashboardDefault() {
     const [value, setValue] = useState('today');
     const [slot, setSlot] = useState('week');
+    const [nbEmployee, setnbEmployee] = useState();
+    const [scannedNBs, setscannedNB] = useState();
+    const [nonscannedNBs, setnonscannedNB] = useState();
+
+    const { user } = useSelector(
+        (state) => state.auth
+    )
+    const AuthStr = 'Bearer '.concat(user.token);
+    var scannedNB = 0
+    var nonscannedNB = 0
+    function getcompanybyadmin() {
+        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+            if (typeof res.data[0] === 'undefined') {
+                console.log("no company for this user")
+            }
+            else {
+                console.log(res.data[0])
+                console.log(res.data[0].employees.length)
+
+                setnbEmployee(res.data[0].employees.length)
+                // setcompanyDetails(res.data[0])
+                //testrows = []
+                res.data[0].areas.forEach(element => {
+                    areas.push(element.area._id)
+                });
+                // setareaselect(areas)
+                FindZoneByArea(areas)
+            }
+
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    //hedhi andha comme input les area w bech trajaa les zones 
+    function FindZoneByArea(areastab) {
+        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areastab }, { headers: { Authorization: AuthStr } }).then((res) => {
+            console.log(res.data)
+            res.data.forEach(element => {
+                console.log(element.products)
+                if (element.products.length > 0) {
+                    scannedNB = scannedNB + 1
+                    setscannedNB(scannedNB)
+                }
+                else if (element.products.length === 0) {
+                    nonscannedNB = nonscannedNB + 1
+                    setnonscannedNB(nonscannedNB)
+                }
+            });
+
+            axios.post("http://localhost:5000/product/CountProductsByZone", { data: res.data }, { headers: { Authorization: AuthStr } }).then((res) => {
+                console.log(res.data)
+            }).catch(function (error) {
+                console.log(error)
+            })
+        }).catch(function (error) {
+            console.log(error)
+        })
+    }
+
+    useEffect(() => {
+        getcompanybyadmin()
+    }, [])
 
     return (
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -80,16 +145,16 @@ const DashboardDefault = () => {
                 <Typography variant="h5">Dashboard</Typography>
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
+                <AnalyticEcommerce title="Total Products" count="4,42,236" extra="35,000" />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce title="Total Users" count="78,250" percentage={70.5} extra="8,900" />
+                <AnalyticEcommerce title="Total Employees" count={nbEmployee} extra="8,900" />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce title="Total Order" count="18,800" percentage={27.4} isLoss color="warning" extra="1,943" />
+                <AnalyticEcommerce title="Total Zones Scanned" count={scannedNBs} color="warning" extra="1,943" />
             </Grid>
             <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce title="Total Sales" count="$35,078" percentage={27.4} isLoss color="warning" extra="$20,395" />
+                <AnalyticEcommerce title="Total Zones None Scanned" count={nonscannedNBs} color="warning" extra="$20,395" />
             </Grid>
 
             <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
@@ -344,4 +409,3 @@ const DashboardDefault = () => {
     );
 };
 
-export default DashboardDefault;
