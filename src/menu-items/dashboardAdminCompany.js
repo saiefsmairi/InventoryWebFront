@@ -33,14 +33,7 @@ const dashboardAdminCompany = {
             icon: icons.DashboardOutlined,
             breadcrumbs: false
         },
-        {
-            id: 'myprofil',
-            title: 'My profil',
-            type: 'item',
-            url: '/myprofil',
-            icon: icons.ProfileOutlined,
-            breadcrumbs: true
-        },
+    
         {
             id: 'companyusers',
             title: 'Manage Company employees ',

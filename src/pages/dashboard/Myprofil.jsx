@@ -197,9 +197,9 @@ export default function Myprofil() {
             {companyDetails || Havecompany === false ?
                 <Grid container spacing={2}  >
 
-                    <Grid item xs={12} md={8} sm container>
+                    <Grid item xs={12} md={12} sm container>
                         <Grid item xs container direction="column" spacing={2} sx={{
-                            boxShadow: 5,
+                          
                             borderRadius: '8px',
                             borderColor: '#e6ebf1'
                         }}>
@@ -341,17 +341,7 @@ export default function Myprofil() {
 
                         </Grid>
                     </Grid>
-                    <Grid item md={4}>
-                        <Box sx={{ p: 3, pb: 0 }}>
-
-                            <Typography variant="h6" color="textSecondary">
-                                weekly revenue
-                            </Typography>
-                            <Typography variant="h4">$7,650</Typography>
-
-                        </Box>
-                        <MonthlyBarChart />
-                    </Grid>
+      
                 </Grid>
 
                 : <CircularProgress />

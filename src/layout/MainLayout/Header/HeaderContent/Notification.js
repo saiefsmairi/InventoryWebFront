@@ -31,6 +31,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getMe } from 'store/reducers/authslice';
 import axios from 'axios'
 
+import { deepOrange, deepPurple } from '@mui/material/colors';
 // sx styles
 const avatarSX = {
     width: 36,
@@ -57,8 +58,9 @@ const Notification = () => {
     const anchorRef = useRef(null);
     const [open, setOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
-    const [singlenotif, setsinglenotif] = useState();
     const [nbNotif, setnbNotif] = useState(0);
+    const [invisible, setInvisible] = useState(false);
+
     const { user } = useSelector(
         (state) => state.auth
     )
@@ -69,7 +71,7 @@ const Notification = () => {
             console.log(res.data)
             res.data.notifications.forEach(element => {
                 console.log(element.notification)
-                setNotifications((prev) => [...prev, element.notification]);
+                setNotifications((prev) => [element.notification, ...prev,]);
             });
 
         }).catch(function (error) {
@@ -81,10 +83,11 @@ const Notification = () => {
         socket.on("getNotification", (data) => {
             console.log("+++++++")
             console.log(data)
-            
+            setInvisible(invisible);
+
             setnbNotif(nbNotif + 1)
             console.log(nbNotif)
-            setNotifications((prev) => [...prev, data]);
+            setNotifications((prev) => [data, ...prev,]);
 
         });
     }, []);
@@ -93,7 +96,7 @@ const Notification = () => {
         setOpen((prevOpen) => !prevOpen);
     };
 
-  
+
 
     const handleClose = (event) => {
         if (anchorRef.current && anchorRef.current.contains(event.target)) {
@@ -118,7 +121,7 @@ const Notification = () => {
                 aria-haspopup="true"
                 onClick={handleToggle}
             >
-                <Badge badgeContent={nbNotif} color="primary" showZero >
+                <Badge variant="dot" invisible={invisible} color="primary"  >
                     <BellOutlined />
                 </Badge>
             </IconButton>
@@ -165,9 +168,6 @@ const Notification = () => {
                                         </IconButton>
                                     }
                                 >
-
-
-                                    nb: {nbNotif}
                                     <List
                                         component="nav"
                                         sx={{
@@ -179,9 +179,41 @@ const Notification = () => {
                                             }
                                         }}
                                     >
-
-
-                                        {notifications.map((person, index) => (
+                                
+                                        {notifications.map((notif, index) => (
+                                          notif.state==='new'
+                                                ? 
+                                            <ListItemButton sx={{backgroundColor:"lightcyan"}} >
+                                                <ListItemAvatar>
+                                                    <Avatar
+                                                        sx={{
+                                                            color: 'success.main',
+                                                            bgcolor: 'success.lighter'
+                                                        }}
+                                                    >
+                                                        <GiftOutlined />
+                                                    </Avatar>
+                                                </ListItemAvatar>
+                                                <ListItemText
+                                                    primary={
+                                                        <Typography variant="h6">
+                                                            {notif.text} 
+                                                            <Typography component="span" variant="subtitle1">
+                                                                {notif.zonename}
+                                                            </Typography>{' '}
+                                                            by {notif.senderFirstName}  {notif.senderLastName}
+                                                        </Typography>
+                                                    }
+                                                    secondary="2 min ago"
+                                                  
+                                                />
+                                                <ListItemSecondaryAction>
+                                                    <Typography variant="caption" noWrap>
+                                                        3:00 AM
+                                                    </Typography>
+                                                </ListItemSecondaryAction>
+                                            </ListItemButton>
+                                                :
                                             <ListItemButton>
                                                 <ListItemAvatar>
                                                     <Avatar
@@ -196,11 +228,11 @@ const Notification = () => {
                                                 <ListItemText
                                                     primary={
                                                         <Typography variant="h6">
-                                                            It&apos;s{' '}
+                                                            {notif.text}
                                                             <Typography component="span" variant="subtitle1">
-                                                                Cristina danny&apos;s
+                                                                {notif.zonename}
                                                             </Typography>{' '}
-                                                            birthday today.
+                                                            by {notif.senderFirstName}  {notif.senderLastName}
                                                         </Typography>
                                                     }
                                                     secondary="2 min ago"

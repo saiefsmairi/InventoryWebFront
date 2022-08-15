@@ -130,12 +130,7 @@ const headCells = [
         disablePadding: false,
         label: 'Employee',
     },
-    {
-        id: 'etat',
-        numeric: true,
-        disablePadding: false,
-        label: 'Action',
-    },
+  
 ];
 
 function EnhancedTableHead(props) {
@@ -589,7 +584,7 @@ export default function ProductsListe() {
                                             <TableCell align="right">{row.zone.name}</TableCell>
                                             <TableCell align="right">{row.employee.firstName} {row.employee.lastName}</TableCell>
 
-                                            <TableCell align="right">
+                                       {/*      <TableCell align="right">
                                                 <Button variant="contained" onClick={() => handleClickopenupdateemployee(row)} sx={{ mx: '10px' }} >
                                                     Update
                                                 </Button>
@@ -597,7 +592,7 @@ export default function ProductsListe() {
                                                     Delete
                                                 </Button>
 
-                                            </TableCell>
+                                            </TableCell> */}
 
                                         </TableRow>
                                     );
@@ -624,7 +619,7 @@ export default function ProductsListe() {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <PDFDownloadLink document={<PdfListProducts prods={wiw}/>} fileName="Products">
+            <PDFDownloadLink document={<PdfListProducts prods={wiw} />} fileName="Products">
                 <Button variant="contained" sx={{ mx: '10px' }} >
                     Download Products as PDF
                 </Button>
