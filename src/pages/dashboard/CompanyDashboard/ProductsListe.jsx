@@ -130,7 +130,7 @@ const headCells = [
         disablePadding: false,
         label: 'Employee',
     },
-  
+
 ];
 
 function EnhancedTableHead(props) {
@@ -303,6 +303,7 @@ export default function ProductsListe() {
     }
 
     function FindProductsById(x) {
+        wiw = []
         console.log(x)
 
         axios.post("http://localhost:5000/product/FindProductsById", { data: x }, { headers: { Authorization: AuthStr } }).then((res) => {
@@ -584,7 +585,7 @@ export default function ProductsListe() {
                                             <TableCell align="right">{row.zone.name}</TableCell>
                                             <TableCell align="right">{row.employee.firstName} {row.employee.lastName}</TableCell>
 
-                                       {/*      <TableCell align="right">
+                                            {/*      <TableCell align="right">
                                                 <Button variant="contained" onClick={() => handleClickopenupdateemployee(row)} sx={{ mx: '10px' }} >
                                                     Update
                                                 </Button>

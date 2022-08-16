@@ -250,9 +250,9 @@ export default function CompanyEmployees() {
     });
 
     function getcompanybyadmin() {
+        testrows=[]
         axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
-
                 setHavecompany(false)
             }
             else {
@@ -260,12 +260,9 @@ export default function CompanyEmployees() {
                 setHavecompany(true)
                 setcompanyDetails(res.data[0])
                 res.data[0].employees.forEach(element => {
-
-
                     testrows.push(element.employee)
                 });
                 setRows(testrows)
-
             }
 
         }).catch(function (error) {

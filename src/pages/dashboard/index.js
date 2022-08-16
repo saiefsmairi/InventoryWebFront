@@ -154,9 +154,7 @@ export default function DashboardDefault() {
             <Grid item xs={12} sx={{ mb: -2.25 }}>
                 <Typography variant="h5">Dashboard</Typography>
             </Grid>
-            <Grid item xs={12} sm={6} md={4} lg={3}>
-                <AnalyticEcommerce title="Total Products" count="4,42,236" extra="35,000" />
-            </Grid>
+       
             <Grid item xs={12} sm={6} md={4} lg={3}>
                 <AnalyticEcommerce title="Total Employees" count={nbEmployee} extra="8,900" />
             </Grid>
@@ -186,12 +184,9 @@ export default function DashboardDefault() {
                     <Grid item>
                         <Stack direction="row" alignItems="center" spacing={0}>
                             {zones.map((z, index) => (
-
                                 <Button
                                     size="small"
                                     onClick={() => setSelectedZone(z)}
-                                /*   color={slot === 'month' ? 'primary' : 'secondary'}
-                                  variant={slot === 'month' ? 'outlined' : 'text'} */
                                 >
                                     {z.name}
                                 </Button>
@@ -201,6 +196,7 @@ export default function DashboardDefault() {
                     </Grid>
                 </Grid>
                 <MainCard sx={{ mt: 2 }} content={false}>
+                    {SelectedZone?SelectedZone.name:"Please Selected a Zone"}
                     {SelectedZone && <ProductsPieData zone={SelectedZone} />}
 
                 </MainCard>

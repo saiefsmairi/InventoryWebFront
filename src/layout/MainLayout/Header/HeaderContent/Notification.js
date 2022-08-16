@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { io } from "socket.io-client";
+import Moment from 'moment';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
@@ -64,9 +65,12 @@ const Notification = () => {
     const { user } = useSelector(
         (state) => state.auth
     )
-    const AuthStr = 'Bearer '.concat(user.token);
+    const AuthStr = 'Bearer '.concat(user?.token);
     useEffect(() => {
 
+        if(user){
+
+       
         axios.get("http://localhost:5000/notification/getnotifbyUser/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             res.data.notifications.forEach(element => {
@@ -84,12 +88,14 @@ const Notification = () => {
             console.log("+++++++")
             console.log(data)
             setInvisible(invisible);
-
             setnbNotif(nbNotif + 1)
             console.log(nbNotif)
             setNotifications((prev) => [data, ...prev,]);
 
         });
+    }
+
+
     }, []);
 
     const handleToggle = () => {
@@ -179,70 +185,71 @@ const Notification = () => {
                                             }
                                         }}
                                     >
-                                
+
                                         {notifications.map((notif, index) => (
-                                          notif.state==='new'
-                                                ? 
-                                            <ListItemButton sx={{backgroundColor:"lightcyan"}} >
-                                                <ListItemAvatar>
-                                                    <Avatar
-                                                        sx={{
-                                                            color: 'success.main',
-                                                            bgcolor: 'success.lighter'
-                                                        }}
-                                                    >
-                                                        <GiftOutlined />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary={
-                                                        <Typography variant="h6">
-                                                            {notif.text} 
-                                                            <Typography component="span" variant="subtitle1">
-                                                                {notif.zonename}
-                                                            </Typography>{' '}
-                                                            by {notif.senderFirstName}  {notif.senderLastName}
+                                            notif.state === 'new'
+                                                ?
+                                                <ListItemButton sx={{ backgroundColor: "lightcyan" }} >
+                                                    <ListItemAvatar>
+                                                        <Avatar
+                                                            sx={{
+                                                                color: 'success.main',
+                                                                bgcolor: 'success.lighter'
+                                                            }}
+                                                        >
+                                                            <GiftOutlined />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary={
+                                                            <Typography variant="h6">
+                                                                {notif.text}
+                                                                <Typography component="span" variant="subtitle1">
+                                                                    {notif.zonename}
+                                                                </Typography>{' '}
+                                                                by {notif.senderFirstName}  {notif.senderLastName}
+                                                            </Typography>
+                                                        }
+                                                        secondary={Moment(notif.date).format('YYYY-MM-DD ')}
+
+                                                    />
+                                                    <ListItemSecondaryAction>
+                                                        <Typography variant="caption" noWrap>
+                                                            {Moment(notif.date).format(' H:mma')}
                                                         </Typography>
-                                                    }
-                                                    secondary="2 min ago"
-                                                  
-                                                />
-                                                <ListItemSecondaryAction>
-                                                    <Typography variant="caption" noWrap>
-                                                        3:00 AM
-                                                    </Typography>
-                                                </ListItemSecondaryAction>
-                                            </ListItemButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItemButton>
                                                 :
-                                            <ListItemButton>
-                                                <ListItemAvatar>
-                                                    <Avatar
-                                                        sx={{
-                                                            color: 'success.main',
-                                                            bgcolor: 'success.lighter'
-                                                        }}
-                                                    >
-                                                        <GiftOutlined />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary={
-                                                        <Typography variant="h6">
-                                                            {notif.text}
-                                                            <Typography component="span" variant="subtitle1">
-                                                                {notif.zonename}
-                                                            </Typography>{' '}
-                                                            by {notif.senderFirstName}  {notif.senderLastName}
+                                                <ListItemButton>
+                                                    <ListItemAvatar>
+                                                        <Avatar
+                                                            sx={{
+                                                                color: 'success.main',
+                                                                bgcolor: 'success.lighter'
+                                                            }}
+                                                        >
+                                                            <GiftOutlined />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary={
+                                                            <Typography variant="h6">
+                                                                {notif.text}
+                                                                <Typography component="span" variant="subtitle1">
+                                                                    {notif.zonename}
+                                                                </Typography>{' '}
+                                                                by {notif.senderFirstName}  {notif.senderLastName}
+                                                            </Typography>
+                                                        }
+                                                        secondary={Moment(notif.date).format('YYYY-MM-DD ')}
+
+                                                    />
+                                                    <ListItemSecondaryAction>
+                                                        <Typography variant="caption" noWrap>
+                                                            {Moment(notif.date).format(' H:mma')}
                                                         </Typography>
-                                                    }
-                                                    secondary="2 min ago"
-                                                />
-                                                <ListItemSecondaryAction>
-                                                    <Typography variant="caption" noWrap>
-                                                        3:00 AM
-                                                    </Typography>
-                                                </ListItemSecondaryAction>
-                                            </ListItemButton>
+                                                    </ListItemSecondaryAction>
+                                                </ListItemButton>
                                         ))}
                                         <Divider />
 

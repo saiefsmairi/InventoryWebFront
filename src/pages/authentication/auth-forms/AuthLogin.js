@@ -182,7 +182,7 @@ const AuthLogin = () => {
                                         }
                                         label={<Typography variant="h6">Keep me sign in</Typography>}
                                     />
-                                    <Link variant="h6" component={RouterLink} to="" color="text.primary">
+                                    <Link variant="h6" component={RouterLink} to="forgetpassword" color="text.primary">
                                         Forgot Password?
                                     </Link>
                                 </Stack>
@@ -207,14 +207,7 @@ const AuthLogin = () => {
                                     </Button>
                                 </AnimateButton>
                             </Grid>
-                            <Grid item xs={12}>
-                                <Divider>
-                                    <Typography variant="caption"> Login with</Typography>
-                                </Divider>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <FirebaseSocial />
-                            </Grid>
+             
                         </Grid>
                         <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
                             <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>

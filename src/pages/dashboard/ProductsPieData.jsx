@@ -9,45 +9,46 @@ import axios from 'axios'
 
 var nameprod = []
 var count = []
-const ProductsPieData = ({ zone }) => {
+export default function ProductsPieData({ zone }) {
+
   const [prodsCount, setprodsCount] = useState([])
   const [prodsCount2, setprodsCount2] = useState([])
+  const [getData, setgetData] = useState(false)
 
-  console.log(zone)
-
-
-  axios.get("http://localhost:5000/product/getproductsbyzone/" + zone._id).then((res) => {
-    console.log(res.data)
-  }).catch(function (error) {
-    console.log(error)
-  })
-
-  axios.get("http://localhost:5000/product/CountProductsByZoneStats/" + zone._id).then((res) => {
-    console.log(res.data)
-    nameprod = []
-    count = []
-    res.data.forEach(element => {
-      nameprod.push(element._id)
-      count.push(element.count)
-
-    });
-   
-    console.log(nameprod)
-    console.log(count)
-  }).catch(function (error) {
-    console.log(error)
-  })
 
   useEffect(() => {
-  console.log(nameprod)
-    }, [nameprod])
+    setgetData(false)
+    axios.get("http://localhost:5000/product/getproductsbyzone/" + zone._id).then((res) => {
+      //console.log(res.data)
+    }).catch(function (error) {
+      console.log(error)
+    })
+
+    axios.get("http://localhost:5000/product/CountProductsByZoneStats/" + zone._id).then((res) => {
+      console.log(res.data)
+      nameprod = []
+      count = []
+      res.data.forEach(element => {
+        nameprod.push(element._id)
+        count.push(element.count)
+
+      });
+
+      setgetData(true)
+      console.log(nameprod)
+      console.log(count)
+    }).catch(function (error) {
+      console.log(error)
+    })
+  }, [zone])
+
 
   var barChartOptions = {
 
     labels: nameprod,
     datasets: [
       {
-        label: '# of Votes',
+        label: '# of Products',
         data: count,
         backgroundColor: [
           'rgba(255, 206, 86, 0.2)',
@@ -73,11 +74,11 @@ const ProductsPieData = ({ zone }) => {
 
   return (
     <div>
-      <Pie data={barChartOptions} />
+
+      {getData && <Pie data={barChartOptions} />}
 
     </div>
 
   );
 };
 
-export default ProductsPieData;
