@@ -3,6 +3,7 @@ import { lazy } from 'react';
 // project import
 import Loadable from 'components/Loadable';
 import MinimalLayout from 'layout/MinimalLayout';
+import ForgetPassword from 'pages/authentication/auth-forms/ForgetPassword';
 
 // render - login
 const AuthLogin = Loadable(lazy(() => import('pages/authentication/Login')));
@@ -21,6 +22,11 @@ const LoginRoutes = {
         {
             path: 'register',
             element: <AuthRegister />
+        }
+        ,
+        {
+            path: 'login/forgetpassword',
+            element: <ForgetPassword />
         }
     ]
 };
