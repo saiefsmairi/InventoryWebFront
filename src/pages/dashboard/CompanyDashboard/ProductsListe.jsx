@@ -248,7 +248,8 @@ export default function ProductsListe() {
     const [rows, setRows] = useState([])
     const [openNotifUpdateEmployee, setopenNotifUpdateEmployee] = useState(false);
     const [areaselect, setareaselect] = React.useState([])
-
+    const [name, setName] = useState();
+    const [file, setFile] = useState();
     const [data, setData] = useState({
         userid: "",
         companyid: "",
@@ -519,8 +520,33 @@ export default function ProductsListe() {
         event.preventDefault();
     };
 
+
+    const send = event => {
+    const datafile = new FormData();
+    datafile.append("name", name);
+    datafile.append("file", file);
+    datafile.append("companyid", companyDetails);
+
+    axios.post("http://localhost:5000/product/productsfilesupload", datafile)
+      .then(res => console.log(res))
+      .catch(err => console.log(err));
+  };
     return (
         <Box sx={{ width: '100%' }}>
+
+            <div className="flex">
+                <label htmlFor="file">Upload inventory File</label>
+                <input
+                    type="file"
+                    id="file"
+                    onChange={event => {
+                        const file = event.target.files[0];
+                        setFile(file);
+                    }}
+                />
+                  <button onClick={send}>Send</button>
+            </div>
+
             <Modal
                 open={open}
                 onClose={handleClose}
