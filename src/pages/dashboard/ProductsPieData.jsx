@@ -18,13 +18,13 @@ export default function ProductsPieData({ zone }) {
 
   useEffect(() => {
     setgetData(false)
-    axios.get("http://localhost:5000/product/getproductsbyzone/" + zone._id).then((res) => {
+    axios.get("https://inventory-back.onrender.com/product/getproductsbyzone/" + zone._id).then((res) => {
       //console.log(res.data)
     }).catch(function (error) {
       console.log(error)
     })
 
-    axios.get("http://localhost:5000/product/CountProductsByZoneStats/" + zone._id).then((res) => {
+    axios.get("https://inventory-back.onrender.com/product/CountProductsByZoneStats/" + zone._id).then((res) => {
       console.log(res.data)
       nameprod = []
       count = []

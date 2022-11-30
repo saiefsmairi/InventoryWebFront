@@ -251,7 +251,7 @@ export default function CompanyEmployees() {
 
     function getcompanybyadmin() {
         testrows=[]
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 setHavecompany(false)
             }
@@ -378,7 +378,7 @@ export default function CompanyEmployees() {
         data.companyid = companyDetails._id;
         console.log(data)
 
-        axios.put("http://localhost:5000/company/updateCompany/RemoveEmployeeFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/company/updateCompany/RemoveEmployeeFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
             console.log(response)
             testrows = []
             setopendelete(false);
@@ -392,7 +392,7 @@ export default function CompanyEmployees() {
             })
 
 
-        axios.delete("http://localhost:5000/users/" + clickedemployee._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.delete("https://inventory-back.onrender.com/users/" + clickedemployee._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             console.log("user deleted")
 
@@ -444,7 +444,7 @@ export default function CompanyEmployees() {
 
     const clickupdatebutton = async (e) => {
         e.preventDefault();
-        axios.put("http://localhost:5000/users/updateuser/" + clickedemployee._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/users/updateuser/" + clickedemployee._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setopenupdateemployee(false);

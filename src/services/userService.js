@@ -6,7 +6,7 @@ const API_URL = '/users/'
 const getAllUsers = async () => {
     const userlogged = JSON.parse(localStorage.getItem("user"))
     const AuthStr = 'Bearer '.concat(userlogged.token);
-    const response = await axios.get('http://localhost:5000/users/users', { headers: { Authorization: AuthStr } });
+    const response = await axios.get('https://inventory-back.onrender.com/users/users', { headers: { Authorization: AuthStr } });
     return (response.data)
 }
 

@@ -8,7 +8,7 @@ const API_URL = '/company/'
 const getcompanybyadmin = async (user) => {
     const userlogged = JSON.parse(localStorage.getItem("user"))
     const AuthStr = 'Bearer '.concat(userlogged.token);
-    const response = await axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } })
+    const response = await axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } })
     return (response.data)
 }
 

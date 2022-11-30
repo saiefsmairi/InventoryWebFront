@@ -79,7 +79,7 @@ const ForgetPassword = () => {
                             onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
                                 try {
                                     console.log(values)
-                                    axios.put("http://localhost:5000/users/forgetPassword/test", values).then(function (response) {
+                                    axios.put("https://inventory-back.onrender.com/users/forgetPassword/test", values).then(function (response) {
                                         console.log(response)
                                         navigate('/login')
                                     })

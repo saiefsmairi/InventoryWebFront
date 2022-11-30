@@ -134,13 +134,13 @@ function AddCompanyEmployee({ companyDetails }) {
                     setSubmitting(false);
                     setOpen(false);
 
-                    axios.post("http://localhost:5000/users", values).then(function (response) {
+                    axios.post("https://inventory-back.onrender.com/users", values).then(function (response) {
                         console.log(response.data._id)
                         data.userid = response.data._id;
                         data.companyid = companyDetails._id;
                         console.log(data)
 
-                        axios.put("http://localhost:5000/company/updateCompany/AddEmployees", data).then(function (response) {
+                        axios.put("https://inventory-back.onrender.com/company/updateCompany/AddEmployees", data).then(function (response) {
 
                             console.log(response)
                             setresponseAddEmployetoCompany(response.data.message)

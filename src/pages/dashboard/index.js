@@ -93,7 +93,7 @@ export default function DashboardDefault() {
     var scannedNB = 0
     var nonscannedNB = 0
     function getcompanybyadmin() {
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log("no company for this user")
             }
@@ -119,7 +119,7 @@ export default function DashboardDefault() {
     //hedhi andha comme input les area w bech trajaa les zones 
     function FindZoneByArea(areastab) {
         zonesTab = []
-        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areastab }, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.post("https://inventory-back.onrender.com/zone/getzonebyarea", { data: areastab }, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             res.data.forEach(element => {
                 zonesTab.push(element)
@@ -135,7 +135,7 @@ export default function DashboardDefault() {
             console.log(zonesTab)
 
             setzones(zonesTab)
-            axios.post("http://localhost:5000/product/CountProductsByZone", { data: res.data }, { headers: { Authorization: AuthStr } }).then((res) => {
+            axios.post("https://inventory-back.onrender.com/product/CountProductsByZone", { data: res.data }, { headers: { Authorization: AuthStr } }).then((res) => {
             }).catch(function (error) {
                 console.log(error)
             })

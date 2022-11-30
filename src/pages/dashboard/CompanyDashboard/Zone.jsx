@@ -217,7 +217,7 @@ export default function Zone() {
 
     async function getcompanybyadmin() {
         areas=[]
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log("no company for this user")
             }
@@ -237,7 +237,7 @@ export default function Zone() {
     }
 
     function FindAreaAndTheirZonesByCompany(data) {
-        axios.get("http://localhost:5000/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             res.data.forEach(element => {
 
@@ -262,7 +262,7 @@ export default function Zone() {
     const clickaddbutton = async (e) => {
         e.preventDefault();
         formData.areaid = area
-        axios.put("http://localhost:5000/zone/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/zone/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setOpen(false);
@@ -325,7 +325,7 @@ export default function Zone() {
         console.log(formData)
 
         console.log("clicked on update")
-         axios.put("http://localhost:5000/zone/updatezone/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+         axios.put("https://inventory-back.onrender.com/zone/updatezone/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setopenupdateemployee(false);
@@ -342,13 +342,13 @@ export default function Zone() {
         dataToDelete.companyid = companyDetails._id;
         dataToDelete.areaid = row.area;
 
-        axios.put("http://localhost:5000/zone/updateZone/RemoveZoneFromArea", dataToDelete, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/zone/updateZone/RemoveZoneFromArea", dataToDelete, { headers: { Authorization: AuthStr } }).then(function (response) {
             if (response) {
                 console.log(response)
                 testrows = []
                 getcompanybyadmin()
 
-                axios.delete("http://localhost:5000/zone/deletezone/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+                axios.delete("https://inventory-back.onrender.com/zone/deletezone/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
                     console.log(res.data)
                     console.log("area deleted")
                     getcompanybyadmin()

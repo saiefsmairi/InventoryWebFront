@@ -77,7 +77,7 @@ export default function Myprofil() {
     function getcompanybyadmin() {
         console.log(user)
         //i need to return phone and last name from back
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log('fi west undefined')
                 setHavecompany(false)
@@ -102,7 +102,7 @@ export default function Myprofil() {
     }
 
     useEffect(() => {
-        axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             setuserLoggedIn(res.data)
             setformDataUser({
@@ -138,7 +138,7 @@ export default function Myprofil() {
                 console.log("clicked on add")
                 console.log(formData)
                 formData.idcompanyadmin = userLoggedIn._id
-                axios.post("http://localhost:5000/company", formData).then(function (response) {
+                axios.post("https://inventory-back.onrender.com/company", formData).then(function (response) {
                     setOpen(true)
 
                     console.log(response)
@@ -154,7 +154,7 @@ export default function Myprofil() {
             console.log("clicked on updated")
             console.log(formData)
             console.log(companyDetails)
-            axios.put("http://localhost:5000/company/" + companyDetails._id, formData).then(function (response) {
+            axios.put("https://inventory-back.onrender.com/company/" + companyDetails._id, formData).then(function (response) {
                 setOpenUpdateAlert(true)
 
                 console.log(response)
@@ -170,7 +170,7 @@ export default function Myprofil() {
         console.log("clicked on updated")
         console.log(formDataUser)
         console.log(user._id)
-        axios.put("http://localhost:5000/users/updateAdminCompanyuser/wiw1/wiw/" + user._id, formDataUser).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/users/updateAdminCompanyuser/wiw1/wiw/" + user._id, formDataUser).then(function (response) {
             setopenUpdateUserAlert(true)
             console.log(response)
         })

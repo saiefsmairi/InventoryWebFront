@@ -71,7 +71,7 @@ const Notification = () => {
         if(user){
 
        
-        axios.get("http://localhost:5000/notification/getnotifbyUser/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/notification/getnotifbyUser/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             res.data.notifications.forEach(element => {
                 console.log(element.notification)

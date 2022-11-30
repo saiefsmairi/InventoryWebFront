@@ -221,7 +221,7 @@ export default function AffectUsersZone() {
     }, [])
 
     function getcompanybyadmin() {
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log("no company for this user")
             }
@@ -250,7 +250,7 @@ export default function AffectUsersZone() {
     }
 
     function FindZoneByArea() {
-        axios.post("http://localhost:5000/zone/getzonebyarea", { data: areaselect }, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.post("https://inventory-back.onrender.com/zone/getzonebyarea", { data: areaselect }, { headers: { Authorization: AuthStr } }).then((res) => {
             setzonebyArea(res.data)
 
         }).catch(function (error) {
@@ -260,7 +260,7 @@ export default function AffectUsersZone() {
 
 
     function FindAreaAndTheirZonesByCompany(data) {
-        axios.get("http://localhost:5000/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/area/getareaandTheirZoneByCompany/" + data._id, { headers: { Authorization: AuthStr } }).then((res) => {
             res.data.forEach(element => {
             });
             // setareaselect(areas)
@@ -270,7 +270,7 @@ export default function AffectUsersZone() {
     }
 
     function findAffectationByCompany(company) {
-        axios.get("http://localhost:5000/affectation/" + company._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/affectation/" + company._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
 
             res.data.forEach(element => {
@@ -292,7 +292,7 @@ export default function AffectUsersZone() {
         formData.company = companyDetails._id
 
         console.log(formData)
-        axios.post("http://localhost:5000/affectation/", formData, { headers: { Authorization: AuthStr } }).then(function (res) {
+        axios.post("https://inventory-back.onrender.com/affectation/", formData, { headers: { Authorization: AuthStr } }).then(function (res) {
             console.log(res)
             getcompanybyadmin()
             setOpen(false)
@@ -363,7 +363,7 @@ export default function AffectUsersZone() {
         console.log(formData)
 
 
-        axios.put("http://localhost:5000/affectation/updateaffectation/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/affectation/updateaffectation/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             toast.success('Affectation updated successfully !', {
                 position: toast.POSITION.TOP_RIGHT
             });
@@ -376,7 +376,7 @@ export default function AffectUsersZone() {
     };
 
     const handleClickDelete = (row) => {
-        axios.delete("http://localhost:5000/affectation/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.delete("https://inventory-back.onrender.com/affectation/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             console.log("affectation deleted")
             toast.success('Affectation deleted successfully !', {

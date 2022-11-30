@@ -161,7 +161,7 @@ export default function UsersAdmin() {
     const [rows, setRows] = React.useState([])
 
     const getAllUsers = () => {
-        axios.get("http://localhost:5000/users/users", { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/users/users", { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             setRows(res.data)
         }).catch(function (error) {
@@ -233,7 +233,7 @@ export default function UsersAdmin() {
 
     const handleClickDelete = (row) => {
         console.log(row)
-        axios.delete("http://localhost:5000/users/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.delete("https://inventory-back.onrender.com/users/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
             console.log(res.data)
             getAllUsers()
 

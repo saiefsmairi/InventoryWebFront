@@ -97,7 +97,7 @@ const Profile = () => {
 
     useEffect(() => {
         if(user){
-        axios.get("http://localhost:5000/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/users/me", { headers: { Authorization: AuthStr } }).then((res) => {
 
             console.log(res.data)
             setuserLoggedIn(res.data)

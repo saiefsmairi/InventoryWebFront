@@ -3,7 +3,7 @@ const API_URL = '/users/'
 
 // Register user
 const register = async (userData) => {
-  const response = await axios.post("http://localhost:5000/users", userData)
+  const response = await axios.post("https://inventory-back.onrender.com/users", userData)
 
   /*  if (response.data) {
      localStorage.setItem('user', JSON.stringify(response.data))
@@ -14,7 +14,7 @@ const register = async (userData) => {
 
 // Login user
 const login = async (userData) => {
-  const response = await axios.post("http://localhost:5000/users/" + 'login', userData)
+  const response = await axios.post("https://inventory-back.onrender.com/users/" + 'login', userData)
 
   if (response.data) {
     localStorage.setItem('user', JSON.stringify(response.data))
@@ -33,7 +33,7 @@ const logout = () => {
 const getMe = async () => {
   const userlogged = JSON.parse(localStorage.getItem("user"))
   const AuthStr = 'Bearer '.concat(userlogged.token);
-  const response = await axios.get('http://localhost:5000/users/me', { headers: { Authorization: AuthStr } });
+  const response = await axios.get('https://inventory-back.onrender.com/users/me', { headers: { Authorization: AuthStr } });
   return response.data
 }
 

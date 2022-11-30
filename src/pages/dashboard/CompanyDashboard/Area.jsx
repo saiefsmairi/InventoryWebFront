@@ -191,7 +191,7 @@ export default function Area() {
     }, [])
 
     function getcompanybyadmin() {
-        axios.get("http://localhost:5000/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
+        axios.get("https://inventory-back.onrender.com/company/getCompanyByAdmin/" + user._id, { headers: { Authorization: AuthStr } }).then((res) => {
             if (typeof res.data[0] === 'undefined') {
                 console.log("no company for this user")
             }
@@ -215,7 +215,7 @@ export default function Area() {
         // getcompanybyadmin()
         formData.companyid = companyDetails._id
         console.log(formData)
-        axios.put("http://localhost:5000/area/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/area/", formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setOpen(false);
@@ -277,7 +277,7 @@ export default function Area() {
         console.log(formData)
 
         console.log("clicked on update")
-        axios.put("http://localhost:5000/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/area/updatearea/" + clickedArea._id, formData, { headers: { Authorization: AuthStr } }).then(function (response) {
             testrows = []
             getcompanybyadmin()
             setopenupdateemployee(false);
@@ -297,13 +297,13 @@ export default function Area() {
         data.companyid = companyDetails._id;
         console.log(data)
 
-        axios.put("http://localhost:5000/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
+        axios.put("https://inventory-back.onrender.com/area/updateCompany/RemoveAreaFromCompany", data, { headers: { Authorization: AuthStr } }).then(function (response) {
             if (response) {
                 console.log(response)
                 testrows = []
                 getcompanybyadmin()
 
-                axios.delete("http://localhost:5000/area/deletearea/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
+                axios.delete("https://inventory-back.onrender.com/area/deletearea/" + row._id, { headers: { Authorization: AuthStr } }).then((res) => {
                     console.log(res.data)
                     console.log("area deleted")
                     getcompanybyadmin()
