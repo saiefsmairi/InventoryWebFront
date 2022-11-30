@@ -522,10 +522,13 @@ export default function ProductsListe() {
 
 
     const send = event => {
+        console.log(companyDetails._id)
     const datafile = new FormData();
     datafile.append("name", name);
     datafile.append("file", file);
-    datafile.append("companyid", companyDetails);
+    datafile.append("nam", "21***");
+
+    datafile.append("companyid", companyDetails._id);
 
     axios.post("http://localhost:5000/product/productsfilesupload", datafile)
       .then(res => console.log(res))

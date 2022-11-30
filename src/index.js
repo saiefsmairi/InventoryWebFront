@@ -15,9 +15,9 @@ import 'assets/third-party/apex-chart.css';
 import App from './App';
 import { store } from 'store';
 import reportWebVitals from './reportWebVitals';
-
+import {disableReactDevTools} from '@fvilers/disable-react-devtools'
 // ==============================|| MAIN - REACT DOM RENDER  ||============================== //
-
+if(process.env.NODE_ENV==='production') disableReactDevTools()
 ReactDOM.render(
     <StrictMode>
         <ReduxProvider store={store}>

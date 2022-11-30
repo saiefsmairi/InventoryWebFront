@@ -198,7 +198,7 @@ export default function Area() {
             else {
                 console.log(res.data[0])
                 setcompanyDetails(res.data[0])
-                res.data[0].areas.forEach(element => {
+                res.data[0].areas?.forEach(element => {
                     testrows.push(element.area)
                 });
                 setRows(testrows)
@@ -359,7 +359,7 @@ export default function Area() {
                                             hover
                                             role="checkbox"
                                             tabIndex={-1}
-                                            key={row._id}
+                                            key={row?._id}
                                         >
                                             <TableCell padding="checkbox">
                                             </TableCell>
